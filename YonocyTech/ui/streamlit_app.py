@@ -374,15 +374,37 @@ with main_col:
     elif st.session_state.current_page == "Memory":
         st.markdown(
             "<h2 style='margin:6px 0 16px; font-size:20px;'>🧠 Memory Explorer</h2>"
-            "<p style='color:var(--text-dim); font-size:13px;'>Hybrid JSON + ChromaDB recall.</p>",
+            "<p style='color:var(--text-dim); font-size:13px;'>Hybrid JSON + ChromaDB semantic recall.</p>",
             unsafe_allow_html=True,
         )
         try:
             sessions = st.session_state.agent.memory.list_sessions()
-            st.metric("Active sessions", len(sessions))
-            st.metric("Total messages", sum(s["count"] for s in sessions))
+            col1, col2 = st.columns(2)
+            col1.metric("Active sessions", len(sessions))
+            col2.metric("Total messages", sum(s["count"] for s in sessions))
         except Exception:
             st.info("Memory stats unavailable.")
+
+        st.markdown("### 🔍 Semantic Search")
+        search_q = st.text_input("Search your conversation history", placeholder="e.g., What did we discuss about deployment?")
+        if search_q:
+            try:
+                sr = st.session_state.agent.semantic_recall
+                if sr:
+                    results = sr.find_relevant_context(search_q, n_results=5)
+                    if results:
+                        for block in results.split("\n\n"):
+                            if block.strip():
+                                st.markdown(
+                                    f"<div class='glass-card' style='font-size:13px;'>{block}</div>",
+                                    unsafe_allow_html=True,
+                                )
+                    else:
+                        st.info("No relevant memories found.")
+                else:
+                    st.info("Vector memory not available (ChromaDB).")
+            except Exception as e:
+                st.info(f"Search unavailable: {e}")
 
     elif st.session_state.current_page == "Contact":
         st.markdown(

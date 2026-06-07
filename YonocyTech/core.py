@@ -316,6 +316,19 @@ class YonocyTech:
         self.providers = []
         self._init_providers()
         self.session_id = None
+        self._semantic = None
+
+    @property
+    def semantic_recall(self):
+        if self._semantic is None:
+            try:
+                from memory.vector_store import VectorMemory
+                from memory.semantic_recall import SemanticRecall
+                vs = VectorMemory()
+                self._semantic = SemanticRecall(vs, self.memory)
+            except Exception:
+                self._semantic = None
+        return self._semantic
 
     def _init_providers(self) -> None:
         db_providers = get_db_providers()
@@ -374,7 +387,7 @@ class YonocyTech:
         if self.user_id and sid:
             try:
                 from database.models import add_message as db_add_message
-                db_add_message(sid, "user", prompt, focus)
+                db_add_message(sid, "user", prompt, focus, user_id=self.user_id)
             except Exception:
                 pass
 
@@ -391,12 +404,21 @@ class YonocyTech:
                 if self.user_id and sid:
                     try:
                         db_add_message(sid, "assistant", response.text, focus,
-                                       tokens=response.tokens_used)
+                                       tokens=response.tokens_used, user_id=self.user_id)
                         from database.models import log_usage
                         log_usage(self.user_id, response.provider, focus or "general",
                                   tokens=response.tokens_used, latency=response.latency_ms)
                     except Exception:
                         pass
+
+                # Save to vector memory for semantic recall
+                try:
+                    if self.semantic_recall:
+                        self.semantic_recall.store_conversation_pair(
+                            prompt, response.text, sid, focus=focus
+                        )
+                except Exception:
+                    pass
 
                 return response
             except Exception as e:

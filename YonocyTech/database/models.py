@@ -109,24 +109,42 @@ def count_users() -> int:
 # SESSIONS & MESSAGES
 # ─────────────────────────────────────────────
 
-def create_session(user_id: int, title: str = "New Session", focus: str = None) -> str:
+def create_session(user_id: int, title: str = "New Session", focus: str = None,
+                   session_id: Optional[str] = None) -> str:
     import uuid
     conn = get_connection()
-    session_id = str(uuid.uuid4())[:12]
+    sid = session_id or str(uuid.uuid4())[:12]
     try:
         conn.execute(
-            "INSERT INTO sessions (id, user_id, title, focus) VALUES (?, ?, ?, ?)",
-            (session_id, user_id, title, focus)
+            "INSERT OR IGNORE INTO sessions (id, user_id, title, focus) VALUES (?, ?, ?, ?)",
+            (sid, user_id, title, focus)
         )
         conn.commit()
-        return session_id
+        return sid
     finally:
         conn.close()
 
 
-def add_message(session_id: str, role: str, content: str, focus: str = None, tokens: int = 0):
+def ensure_session(session_id: str, user_id: Optional[int] = None):
+    """Create session in SQLite if it doesn't exist yet."""
     conn = get_connection()
     try:
+        exists = conn.execute("SELECT 1 FROM sessions WHERE id = ?", (session_id,)).fetchone()
+        if not exists and user_id:
+            conn.execute(
+                "INSERT OR IGNORE INTO sessions (id, user_id, title) VALUES (?, ?, ?)",
+                (session_id, user_id, "Auto Session")
+            )
+            conn.commit()
+    finally:
+        conn.close()
+
+
+def add_message(session_id: str, role: str, content: str, focus: str = None,
+                tokens: int = 0, user_id: Optional[int] = None):
+    conn = get_connection()
+    try:
+        ensure_session(session_id, user_id)
         conn.execute(
             "INSERT INTO messages (session_id, role, content, focus, tokens_used) VALUES (?, ?, ?, ?, ?)",
             (session_id, role, content, focus, tokens)
