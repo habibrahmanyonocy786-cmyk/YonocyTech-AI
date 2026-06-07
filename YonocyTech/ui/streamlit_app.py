@@ -104,7 +104,7 @@ if not st.session_state.logged_in:
                     st.error("Invalid email or password.")
     with tab[1]:
         with st.form("register_form"):
-            r_name = st.text_input("Full Name", placeholder="Habibur Rahman")
+            r_name = st.text_input("Full Name", placeholder="Habib Rahman")
             r_email = st.text_input("Email", placeholder="your@email.com")
             r_pass = st.text_input("Password", type="password")
             r_confirm = st.text_input("Confirm Password", type="password")
@@ -251,7 +251,7 @@ with main_col:
             meta = msg.get("meta")
             render_msg_bubble(
                 role=msg["role"],
-                name="Habibur Rahman" if msg["role"] == "user" else "YonocyTech AI",
+                name="Habib Rahman" if msg["role"] == "user" else "YonocyTech AI",
                 content=msg["content"],
                 agent_tag=msg.get("agent_tag"),
                 meta=meta,

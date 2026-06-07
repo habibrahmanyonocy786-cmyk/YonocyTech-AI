@@ -366,7 +366,7 @@ def render_agent_item(key: str, label: str, active: bool = False) -> bool:
     return st.button(f"Use {label}", key=f"agent_{key}", use_container_width=True)
 
 
-def render_session_card(user_name: str = "Habibur Rahman", tier: str = "Free tier"):
+def render_session_card(user_name: str = "Habib Rahman", tier: str = "Free tier"):
     """Bottom user pill inside the sidebar."""
     initials = "".join([p[0] for p in user_name.split()[:2]]).upper() or "U"
     st.markdown(

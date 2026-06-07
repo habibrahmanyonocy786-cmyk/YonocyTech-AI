@@ -1,6 +1,6 @@
 # YonocyTech — AI · Web · Database Solutions
 
-**Developer:** Habibur Rahman Younesi (حبیب الرحمن یونسی)
+**Developer:** Habib Rahman Yonocy (حبیب رحمان یونسی)
 
 Professional AI agent platform, web development, and database management services.
 
@@ -18,7 +18,7 @@ The YonocyTech marketing website is deployed on **GitHub Pages**:
 | `index.html` | Main landing page with hero, features, services overview, AI agents showcase |
 | `services.html` | Detailed AI platform, web development, and database services |
 | `pricing.html` | Free, Pro ($9/mo), and Enterprise ($29/mo) pricing tiers |
-| `about.html` | About Habibur Rahman Younesi and the YonocyTech vision |
+| `about.html` | About Habib Rahman Yonocy and the YonocyTech vision |
 | `contact.html` | Contact form and social links |
 | `login.html` | User login and registration with admin auto-detection |
 | `dashboard.html` | User dashboard with AI agent access, sessions, memory explorer |

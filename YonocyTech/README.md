@@ -1,6 +1,6 @@
 # 🚀 YonocyTech AI Agent v2.0
 
-**Developer:** Habibur Rahman Younesi (حبیب الرحمن یونسی)  
+**Developer:** Habib Rahman Yonocy (حبیب رحمان یونسی)  
 **Goal:** High-performance, zero-budget AI agent for software engineering, content creation, and data analysis.
 
 ## 🌟 Features

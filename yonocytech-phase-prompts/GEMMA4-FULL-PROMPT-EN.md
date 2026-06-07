@@ -1,6 +1,6 @@
 # YonocyTech AI Agent — Complete Prompt for Gemma 4 31B Cloud
 
-> Developer: Habibur Rahman Younesi (حبیب الرحمن یونسی)
+> Developer: Habib Rahman Yonocy (حبیب رحمان یونسی)
 > Final Goal: Build a complete AI Agent that can generate monthly income after completion — $0 budget, runs on a single laptop: Dell Latitude E5440 (Core i5, 8GB RAM, GT 720M, Windows 10).
 
 ---
@@ -310,6 +310,6 @@ README.md, .github/workflows/test.yml, .streamlit/secrets.toml.example, packages
 
 ---
 
-Developer: Habibur Rahman Younesi
+Developer: Habib Rahman Yonocy
 Model: Gemma 4 31B Cloud
 Project: YonocyTech AI Agent v2.0
