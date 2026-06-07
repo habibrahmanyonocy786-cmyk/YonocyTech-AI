@@ -16,10 +16,16 @@ for _key in ["OPENROUTER_API_KEY", "HF_API_KEY", "GITHUB_TOKEN", "DEEPAI_API_KEY
     if _key in st.secrets:
         os.environ[_key] = st.secrets[_key]
 
-from core import YonocyTech
+from core import YonocyTech, register_user, login_user, get_db_providers, get_db_agents
 from agents import ALL_AGENTS
 from tools.file_manager import FileManager
 from tools.orchestrator import Orchestrator
+from database.models import (
+    get_all_providers, update_provider_status, update_provider_rate_limit,
+    get_all_agents, update_agent_status, update_agent_provider,
+    get_all_users, get_usage_stats, get_all_settings, set_setting,
+    get_contact_messages, save_contact_message, count_users
+)
 from ui.components import (
     apply_theme,
     render_brand,
@@ -51,10 +57,78 @@ apply_theme()
 
 
 # ----------------------------------------------------------------------------
-# STATE
+# AUTH STATE
+# ----------------------------------------------------------------------------
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+    st.session_state.user = None
+
+if "show_login" not in st.session_state:
+    st.session_state.show_login = True
+
+# Login / Register page
+if not st.session_state.logged_in:
+    st.markdown("""
+        <div style="display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px;">
+            <div style="background:rgba(28,28,65,0.65); border:1px solid rgba(108,99,255,0.18);
+                        border-radius:20px; padding:48px 40px; max-width:420px; width:100%;
+                        backdrop-filter:blur(20px); box-shadow:0 0 0 1px rgba(108,99,255,0.25);">
+                <div style="text-align:center; margin-bottom:32px;">
+                    <div style="width:52px; height:52px; margin:0 auto 12px; border-radius:14px;
+                                background:linear-gradient(135deg,#6C63FF,#00D9FF,#FF4FCB);
+                                display:grid; place-items:center; font-size:24px;
+                                box-shadow:0 8px 24px rgba(108,99,255,0.4);">Y</div>
+                    <h2 style="font-size:22px; font-weight:700;">Welcome to YonocyTech</h2>
+                    <p style="font-size:14px; color:#A5A5C7;">Sign in to access AI agents</p>
+                </div>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+    tab = st.tabs(["Sign In", "Create Account"])
+    with tab[0]:
+        with st.form("login_form"):
+            l_email = st.text_input("Email", placeholder="your@email.com")
+            l_pass = st.text_input("Password", type="password")
+            if st.form_submit_button("Sign In", use_container_width=True):
+                user = login_user(l_email, l_pass)
+                if user:
+                    st.session_state.logged_in = True
+                    st.session_state.user = user
+                    st.session_state.show_login = False
+                    st.rerun()
+                else:
+                    st.error("Invalid email or password.")
+    with tab[1]:
+        with st.form("register_form"):
+            r_name = st.text_input("Full Name", placeholder="Habibur Rahman")
+            r_email = st.text_input("Email", placeholder="your@email.com")
+            r_pass = st.text_input("Password", type="password")
+            r_confirm = st.text_input("Confirm Password", type="password")
+            if st.form_submit_button("Create Account", use_container_width=True):
+                if r_pass != r_confirm:
+                    st.error("Passwords do not match.")
+                elif len(r_pass) < 4:
+                    st.error("Password must be at least 4 characters.")
+                else:
+                    user = register_user(r_name, r_email, r_pass)
+                    if user:
+                        st.session_state.logged_in = True
+                        st.session_state.user = user
+                        st.session_state.show_login = False
+                        st.success("Account created! Redirecting...")
+                        st.rerun()
+                    else:
+                        st.error("Email already exists or registration failed.")
+    st.stop()
+
+
+# ----------------------------------------------------------------------------
+# STATE (Authenticated)
 # ----------------------------------------------------------------------------
 if "agent" not in st.session_state:
-    st.session_state.agent = YonocyTech()
+    user_id = st.session_state.user.get("id")
+    st.session_state.agent = YonocyTech(user_id=user_id)
     st.session_state.fm = FileManager()
     agents_instances = {name: cls(st.session_state.agent) for name, cls in ALL_AGENTS.items()}
     st.session_state.orchestrator = Orchestrator(st.session_state.agent, agents_instances)
@@ -71,12 +145,37 @@ if "agent" not in st.session_state:
 with st.sidebar:
     render_brand()
 
+    # User info
+    user = st.session_state.user
+    initials = "".join([p[0] for p in user["name"].split()[:2]]).upper() or "U"
+    plan_badge = {"free": "🔹 Free", "pro": "💎 Pro", "enterprise": "🏢 Enterprise"}.get(user.get("plan", "free"), "🔹 Free")
+    st.markdown(
+        f"""
+        <div style="display:flex; align-items:center; gap:10px; padding:10px 8px; margin-bottom:8px;
+                    background:rgba(20,20,50,0.55); border:1px solid rgba(108,99,255,0.18);
+                    border-radius:14px;">
+            <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#6C63FF,#00D9FF,#FF4FCB);
+                        display:grid; place-items:center; font-weight:700; color:#fff; font-size:13px;">
+                {initials}
+            </div>
+            <div>
+                <div style="font-size:13px; font-weight:600;">{user["name"]}</div>
+                <div style="font-size:11px; color:#A5A5C7;">{plan_badge} · {user.get("role","user").title()}</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
     st.markdown(
         "<h4 style='font-size:11px; text-transform:uppercase; letter-spacing:1.2px; "
         "color:var(--text-mute); margin:14px 8px 8px; font-weight:600;'>Workspace</h4>",
         unsafe_allow_html=True,
     )
-    for page, icon in [("Chat", "💬"), ("Agent Chain", "⛓️"), ("Files", "📁"), ("Memory", "🧠")]:
+    nav_pages = [("Chat", "💬"), ("Agent Chain", "⛓️"), ("Files", "📁"), ("Memory", "🧠")]
+    if user.get("role") == "admin":
+        nav_pages.append(("Admin Panel", "🔐"))
+    for page, icon in nav_pages:
         active = st.session_state.current_page == page
         label = f"{icon}  {page}"
         if st.button(label, key=f"nav_{page}", use_container_width=True):
@@ -112,6 +211,12 @@ with st.sidebar:
         st.rerun()
 
     render_session_card()
+
+    if st.button("🚪  Sign Out", key="signout", use_container_width=True):
+        st.session_state.logged_in = False
+        st.session_state.user = None
+        st.session_state.agent = None
+        st.rerun()
 
 
 # ----------------------------------------------------------------------------
@@ -261,6 +366,119 @@ with main_col:
         except Exception:
             st.info("Memory stats unavailable.")
 
+    elif st.session_state.current_page == "Admin Panel":
+        user = st.session_state.user
+        if user.get("role") != "admin":
+            st.error("Access denied. Admin privileges required.")
+        else:
+            tabs = st.tabs(["📊 Overview", "🔌 Providers", "🤖 Agents", "👥 Users", "📋 Contact", "⚙️ Settings"])
+
+            with tabs[0]:
+                col1, col2, col3, col4 = st.columns(4)
+                col1.metric("Total Users", count_users())
+                col2.metric("Active Providers", len(get_all_providers()))
+                col3.metric("Active Agents", len(get_all_agents()))
+                stats = get_usage_stats()
+                col4.metric("Total Requests", stats.get("total_requests", 0))
+
+                st.markdown("### 📡 Provider Status")
+                providers = get_all_providers()
+                for p in providers:
+                    status_color = {"active": "#4ADE80", "limited": "#FBBF24", "off": "#F87171"}.get(p["status"], "#A5A5C7")
+                    st.markdown(
+                        f"<div style='display:flex; align-items:center; gap:12px; padding:10px 14px; "
+                        f"background:rgba(20,20,50,0.55); border:1px solid rgba(108,99,255,0.18); "
+                        f"border-radius:10px; margin-bottom:6px;'>"
+                        f"<span style='color:{status_color}; font-size:10px;'>●</span> "
+                        f"<b style='flex:1;'>{p['name']}</b> "
+                        f"<span style='color:#A5A5C7; font-size:13px;'>{p['rate_limit']}/min</span> "
+                        f"<span style='color:var(--text-dim); font-size:13px;'>{p['status'].title()}</span>"
+                        f"</div>",
+                        unsafe_allow_html=True,
+                    )
+
+            with tabs[1]:
+                st.markdown("### 🔌 LLM Provider Management")
+                st.caption("Enable, disable, or limit each provider.")
+                providers = get_all_providers()
+                for p in providers:
+                    with st.expander(f"{'🟢' if p['status']=='active' else '🟡' if p['status']=='limited' else '🔴'} {p['name']}", expanded=False):
+                        cols = st.columns([2, 1, 1])
+                        new_status = cols[0].selectbox(
+                            "Status",
+                            ["active", "limited", "off"],
+                            index=["active", "limited", "off"].index(p["status"]),
+                            key=f"prov_status_{p['id']}"
+                        )
+                        new_rate = cols[1].number_input(
+                            "Rate Limit (req/min)",
+                            min_value=1, max_value=100,
+                            value=p["rate_limit"],
+                            key=f"prov_rate_{p['id']}"
+                        )
+                        if cols[2].button("Save", key=f"prov_save_{p['id']}"):
+                            update_provider_status(p["id"], new_status)
+                            update_provider_rate_limit(p["id"], new_rate)
+                            st.success(f"✅ {p['name']} updated!")
+                            st.rerun()
+
+            with tabs[2]:
+                st.markdown("### 🤖 Agent Management")
+                st.caption("Control which agents are available.")
+                agents = get_all_agents()
+                for a in agents:
+                    with st.expander(f"{a['icon']} {a['name']}", expanded=False):
+                        cols = st.columns([2, 1])
+                        new_status = cols[0].selectbox(
+                            "Status",
+                            ["active", "limited", "off"],
+                            index=["active", "limited", "off"].index(a["status"]),
+                            key=f"agent_status_{a['id']}"
+                        )
+                        if cols[1].button("Save", key=f"agent_save_{a['id']}"):
+                            update_agent_status(a["id"], new_status)
+                            st.success(f"✅ {a['name']} updated!")
+                            st.rerun()
+
+            with tabs[3]:
+                st.markdown("### 👥 Registered Users")
+                users = get_all_users()
+                for u in users:
+                    st.markdown(
+                        f"<div style='display:flex; align-items:center; gap:12px; padding:10px 14px; "
+                        f"background:rgba(20,20,50,0.55); border:1px solid rgba(108,99,255,0.18); "
+                        f"border-radius:10px; margin-bottom:6px;'>"
+                        f"<b>{u['name']}</b> "
+                        f"<span style='color:#A5A5C7;'>{u['email']}</span> "
+                        f"<span style='margin-left:auto;'>{'👑 Admin' if u['role']=='admin' else '👤 User'} · {u['plan']}</span>"
+                        f"</div>",
+                        unsafe_allow_html=True,
+                    )
+
+            with tabs[4]:
+                st.markdown("### 📋 Contact Messages")
+                msgs = get_contact_messages()
+                if not msgs:
+                    st.info("No messages yet.")
+                for m in msgs:
+                    with st.expander(f"📧 {m['name']} — {m.get('subject','No Subject')}"):
+                        st.write(f"**From:** {m['name']} ({m['email']})")
+                        st.write(f"**Date:** {m['created_at']}")
+                        st.write(f"**Message:** {m['message']}")
+
+            with tabs[5]:
+                st.markdown("### ⚙️ System Settings")
+                settings = get_all_settings()
+                for k, v in settings.items():
+                    cols = st.columns([2, 1])
+                    new_val = cols[0].text_input(k, value=v, key=f"setting_{k}")
+                    if cols[1].button("Save", key=f"setting_save_{k}"):
+                        set_setting(k, new_val)
+                        st.success(f"✅ {k} saved!")
+                st.markdown("---")
+                if st.button("🗑️ Reset All Data", type="secondary"):
+                    st.warning("This will clear all data. Feature coming soon.")
+
 
 # ----------------------------------------------------------------------------
 # ASIDE PANELS
@@ -284,9 +502,10 @@ with aside_col:
         {"type": "json",   "text": f"{len(st.session_state.messages)} messages this session"},
     ])
 
+    stats = get_usage_stats()
     render_aside_stats({
-        "Tokens used":         "2,847",
+        "Tokens used":         str(stats.get("total_tokens", "0")),
         "Cost":                "$0.00",
-        "Latency avg":         "1.2s",
-        "Injections blocked":  '<span style="color:var(--danger);">3</span>',
+        "Latency avg":         f'{stats.get("avg_latency", 0):.0f}ms',
+        "Requests":            str(stats.get("total_requests", "0")),
     })

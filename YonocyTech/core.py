@@ -14,6 +14,11 @@ from dotenv import load_dotenv
 load_dotenv("config/.env")
 load_dotenv()
 
+# Initialize SQLite database
+os.environ.setdefault("DATABASE_URL", "sqlite")
+from database.schema import migrate
+migrate()
+
 # ----------------------------------------------------------------------------
 # DATA MODELS
 # ----------------------------------------------------------------------------
@@ -254,6 +259,33 @@ class MemoryStore:
         return sessions_info
 
 # ----------------------------------------------------------------------------
+# DATABASE AUTH INTEGRATION
+# ----------------------------------------------------------------------------
+
+def register_user(name: str, email: str, password: str) -> Optional[Dict]:
+    from database.models import create_user, get_user_by_email
+    return create_user(name, email, password)
+
+
+def login_user(email: str, password: str) -> Optional[Dict]:
+    from database.models import authenticate
+    user = authenticate(email, password)
+    if user:
+        user.pop("password", None)
+    return user
+
+
+def get_db_providers() -> List[Dict]:
+    from database.models import get_active_providers
+    return get_active_providers()
+
+
+def get_db_agents() -> List[Dict]:
+    from database.models import get_active_agents
+    return get_active_agents()
+
+
+# ----------------------------------------------------------------------------
 # MAIN AI AGENT CLASS
 # ----------------------------------------------------------------------------
 
@@ -275,24 +307,36 @@ class YonocyTech:
         "default": "You are YonocyTech AI, a highly capable assistant. Be helpful, precise, and objective."
     }
 
-    def __init__(self, name: str = "YonocyTech", version: str = "2.0"):
+    def __init__(self, name: str = "YonocyTech", version: str = "2.0", user_id: Optional[int] = None):
         self.name = name
         self.version = version
+        self.user_id = user_id
         self.memory = MemoryStore()
         self.providers = []
         self._init_providers()
         self.session_id = None
 
     def _init_providers(self) -> None:
-        # Priority: OpenRouter > HuggingFace > GitHubModels
-        potential_providers = [
-            OpenRouterProvider(),
-            HuggingFaceProvider(),
-            GitHubModelsProvider(),
-        ]
-        self.providers = [p for p in potential_providers if p.is_available]
+        db_providers = get_db_providers()
+        db_active_ids = {p["id"] for p in db_providers}
 
-    async def ask(self, prompt: str, focus: Optional[str] = None, session_id: Optional[str] = None) -> AgentResponse:
+        provider_map = {
+            "openrouter": OpenRouterProvider(),
+            "huggingface": HuggingFaceProvider(),
+            "github-models": GitHubModelsProvider(),
+        }
+
+        self.providers = []
+        for key, prov in provider_map.items():
+            if key in db_active_ids and prov.is_available:
+                self.providers.append(prov)
+
+        # Fallback: if DB is empty, use all available providers
+        if not self.providers:
+            self.providers = [p for p in provider_map.values() if p.is_available]
+
+    async def ask(self, prompt: str, focus: Optional[str] = None,
+                  session_id: Optional[str] = None) -> AgentResponse:
         if not prompt:
             raise ValueError("Prompt cannot be empty")
 
@@ -311,22 +355,44 @@ class YonocyTech:
         # 3. Add current user message
         messages.append({"role": "user", "content": prompt})
 
-        # 4. Save user message to memory
+        # 4. Save user message to memory (JSON)
         self.memory.add_message(sid, "user", prompt, focus=focus)
 
-        # 5. Fallback Chain
+        # 5. Save to SQLite if user is authenticated
+        if self.user_id and sid:
+            try:
+                from database.models import add_message as db_add_message
+                db_add_message(sid, "user", prompt, focus)
+            except Exception:
+                pass
+
+        # 6. Fallback Chain
         last_exception = None
+        last_provider_name = None
         for provider in self.providers:
             try:
                 response = await provider.ask(messages)
-                # Save assistant response to memory
+                # Save assistant response to JSON memory
                 self.memory.add_message(sid, "assistant", response.text, focus=focus)
+
+                # Save to SQLite
+                if self.user_id and sid:
+                    try:
+                        db_add_message(sid, "assistant", response.text, focus,
+                                       tokens=response.tokens_used)
+                        from database.models import log_usage
+                        log_usage(self.user_id, response.provider, focus or "general",
+                                  tokens=response.tokens_used, latency=response.latency_ms)
+                    except Exception:
+                        pass
+
                 return response
             except Exception as e:
                 last_exception = e
+                last_provider_name = provider.__class__.__name__
                 continue
 
-        # 6. If all fail
+        # 7. If all fail
         provider_names = [p.__class__.__name__ for p in self.providers]
         error_msg = f"All providers failed. Attempted: {', '.join(provider_names)}. Last error: {last_exception}"
         return AgentResponse(text=error_msg, model="N/A", provider="None")
