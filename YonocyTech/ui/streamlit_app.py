@@ -364,8 +364,9 @@ with main_col:
             unsafe_allow_html=True,
         )
         try:
-            count = st.session_state.agent.memory.count if hasattr(st.session_state.agent.memory, "count") else 0
-            st.metric("Vector nodes", count)
+            sessions = st.session_state.agent.memory.list_sessions()
+            st.metric("Active sessions", len(sessions))
+            st.metric("Total messages", sum(s["count"] for s in sessions))
         except Exception:
             st.info("Memory stats unavailable.")
 
@@ -490,11 +491,11 @@ with aside_col:
     # Provider health
     try:
         providers_meta = [
-            {"role": "Primary",   "name": getattr(p, "name", str(p))}
-            for p in st.session_state.agent.providers[:3]
+            {"role": "Primary" if i == 0 else f"Fallback {i}", "name": p.__class__.__name__.replace("Provider", "")}
+            for i, p in enumerate(st.session_state.agent.providers[:3])
         ]
     except Exception:
-        providers_meta = [{"role": "Primary", "name": "openrouter"}]
+        providers_meta = [{"role": "Primary", "name": "OpenRouter"}]
     render_aside_provider(providers_meta)
 
     render_aside_chain(st.session_state.chain_tasks)
@@ -507,8 +508,8 @@ with aside_col:
 
     stats = get_usage_stats()
     render_aside_stats({
+        "Messages":            str(len(st.session_state.messages)),
+        "Sessions":            str(stats.get("total_sessions", len(st.session_state.agent.memory.sessions))),
         "Tokens used":         str(stats.get("total_tokens", "0")),
-        "Cost":                "$0.00",
-        "Latency avg":         f'{stats.get("avg_latency", 0):.0f}ms',
-        "Requests":            str(stats.get("total_requests", "0")),
+        "Providers":           str(len(st.session_state.agent.providers)),
     })

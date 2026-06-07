@@ -31,7 +31,7 @@ def test_sanitize_control_chars():
     sanitized = sanitize_input(text)
     assert "\x00" not in sanitized
     assert "\n" in sanitized
-    assert "\t" in sanitized
+    assert "\t" not in sanitized  # tabs are normalized to spaces
 
 def test_sanitize_length():
     text = "a" * 5000

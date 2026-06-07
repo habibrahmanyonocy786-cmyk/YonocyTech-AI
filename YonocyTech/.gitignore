@@ -14,6 +14,8 @@ env/
 # Memory & Data
 memory/data/*.json
 chroma_data/
+temp_chroma/
+temp_mem/
 *.db
 
 # OS
