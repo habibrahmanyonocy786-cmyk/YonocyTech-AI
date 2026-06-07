@@ -20,13 +20,14 @@ from database.models import (
 @pytest.fixture(autouse=True)
 def clean_db():
     tmp_dir = tempfile.mkdtemp()
-    old_path = database.DB_PATH
-    database.DB_PATH = os.path.join(tmp_dir, "test.db")
-    database.DB_DIR = tmp_dir
+    old_path = os.environ.get("YONOCYTECH_DB_PATH")
+    os.environ["YONOCYTECH_DB_PATH"] = os.path.join(tmp_dir, "test.db")
     migrate()
     yield
-    database.DB_PATH = old_path
-    database.DB_DIR = os.path.join(os.path.dirname(database.__file__), "data")
+    if old_path:
+        os.environ["YONOCYTECH_DB_PATH"] = old_path
+    else:
+        os.environ.pop("YONOCYTECH_DB_PATH", None)
     shutil.rmtree(tmp_dir, ignore_errors=True)
 
 
