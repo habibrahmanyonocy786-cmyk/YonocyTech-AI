@@ -14,6 +14,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'dist')));
 
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', uptime: process.uptime() });
+});
+
 // API Routes
 app.post('/api/auth/signup', (req, res) => {
   const { name, email, password } = req.body;
