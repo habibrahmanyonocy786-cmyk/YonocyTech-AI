@@ -1,4 +1,13 @@
 """Tests for the FastAPI REST API layer."""
+import os, tempfile, shutil, atexit
+
+# Isolated temp DB for API tests
+_tmp = os.environ.get("YONOCYTECH_DB_PATH")
+if not _tmp:
+    _tmp_dir = tempfile.mkdtemp()
+    os.environ["YONOCYTECH_DB_PATH"] = os.path.join(_tmp_dir, "test.db")
+    atexit.register(lambda: shutil.rmtree(_tmp_dir, ignore_errors=True))
+
 import pytest
 from fastapi.testclient import TestClient
 from api.server import app
