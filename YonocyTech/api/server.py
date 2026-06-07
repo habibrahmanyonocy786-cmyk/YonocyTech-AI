@@ -7,6 +7,10 @@ from fastapi.responses import JSONResponse
 from api.routes import auth, sessions, providers, agents, contact, admin
 from api.schemas import HealthResponse
 
+# Auto-migrate database on startup
+from database.schema import migrate
+migrate()
+
 app = FastAPI(
     title="YonocyTech AI API",
     version="2.0",
