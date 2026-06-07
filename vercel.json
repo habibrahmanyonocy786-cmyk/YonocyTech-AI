@@ -2,5 +2,8 @@
   "project": "prj_JrjBhQEWbUbGfmdVOzljwJU4XXQu",
   "buildCommand": null,
   "outputDirectory": ".",
-  "framework": null
+  "framework": null,
+  "edgeConfig": {
+    "id": "ecfg_mtw49bapm0nxbkhdm1d1gda3b3fm"
+  }
 }
