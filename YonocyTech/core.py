@@ -87,8 +87,10 @@ class OpenRouterProvider:
 
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(self.url, headers=headers, json=body)
-            response.raise_for_status()
             data = response.json()
+            if response.status_code != 200:
+                error_detail = data.get("error", {}).get("message", str(data))
+                raise Exception(error_detail)
 
         latency = (time.time() - start_time) * 1000
         return AgentResponse(
@@ -428,8 +430,17 @@ class YonocyTech:
 
         # 7. If all fail
         provider_names = [p.__class__.__name__ for p in self.providers]
-        error_msg = f"All providers failed. Attempted: {', '.join(provider_names)}. Last error: {last_exception}"
-        return AgentResponse(text=error_msg, model="N/A", provider="None")
+        error_text = str(last_exception) if last_exception else "Unknown error"
+
+        if "image" in error_text.lower() and "not support" in error_text.lower():
+            user_friendly = (
+                "This model only supports text. Images and files cannot be processed. "
+                "Please describe what's in the image or file using text."
+            )
+        else:
+            user_friendly = f"All providers failed. Attempted: {', '.join(provider_names)}. Last error: {error_text}"
+
+        return AgentResponse(text=user_friendly, model="N/A", provider="None")
 
 # ----------------------------------------------------------------------------
 # CLI INTERFACE
