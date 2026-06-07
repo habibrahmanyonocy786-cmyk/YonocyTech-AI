@@ -15,3 +15,9 @@ requests>=2.31.0
 feedparser>=6.0.0
 pytest>=8.0.0
 bcrypt>=4.1.0
+
+# REST API layer (FastAPI)
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+pydantic[email]>=2.5.0
+pydantic-settings>=2.1.0
