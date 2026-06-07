@@ -1,25 +1,20 @@
-# Environment & Secrets
-.env
-.streamlit/secrets.toml
-**/.env
-**/secrets.toml
+# OS
+Thumbs.db
+.DS_Store
 
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
-venv/
-.venv/
-env/
+*.egg-info/
+*.egg
+.env
 
-# Memory & Data
-**/memory/data/*.json
-**/chroma_data/
-**/*.db
+# Streamlit
+.streamlit/secrets.toml
 
-# OS
-.DS_Store
-Thumbs.db
+# Memory
+YonocyTech/memory/data/
+YonocyTech/memory/chroma_data/
 
-# Logs
-*.log
+# Temp
+sandbox_temp.py

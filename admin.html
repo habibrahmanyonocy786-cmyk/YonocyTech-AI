@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Panel — YonocyTech</title>
+<meta name="description" content="YonocyTech admin panel for managing AI models, agents, users, and system settings." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+<div class="cosmos"></div>
+<div class="stars"></div>
+
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="nav-brand">
+      <div class="logo">Y</div>
+      YonocyTech
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="services.html">Services</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+    </ul>
+    <div class="nav-actions">
+      <span style="font-size:13px; color:var(--text-dim);">🔐 Admin</span>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Sign Out</button>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">☰</button>
+    </div>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <aside class="admin-sidebar" style="position:fixed; top:var(--nav-height); left:0; width:260px; bottom:0; background:linear-gradient(180deg,rgba(11,11,36,0.85),rgba(7,7,26,0.95)); border-right:1px solid var(--border); padding:24px 16px; overflow-y:auto;">
+    <div style="padding:16px 8px 8px; border-bottom:1px solid var(--border); margin-bottom:8px; display:flex; align-items:center; gap:10px;">
+      <div style="width:40px; height:40px; border-radius:10px; background:var(--gradient-brand); display:grid; place-items:center; font-size:18px; color:#fff;">🔐</div>
+      <div><div style="font-weight:700; font-size:15px;">Admin Panel</div><div style="font-size:11px; color:var(--text-dim);">System Management</div></div>
+    </div>
+    <h4>Management</h4>
+    <button class="dash-nav-item active" onclick="showAdminSection('overview')">📊 Overview</button>
+    <button class="dash-nav-item" onclick="showAdminSection('models')">🔌 LLM Providers</button>
+    <button class="dash-nav-item" onclick="showAdminSection('agents')">🤖 Agents</button>
+    <button class="dash-nav-item" onclick="showAdminSection('users')">👥 Users</button>
+    <h4>System</h4>
+    <button class="dash-nav-item" onclick="showAdminSection('settings')">⚙️ Settings</button>
+    <button class="dash-nav-item" onclick="showAdminSection('logs')">📋 Activity Log</button>
+  </aside>
+
+  <main class="admin-main" style="margin-left:260px; padding:32px;">
+    <div id="admin-overview">
+      <div class="dash-header"><h1>📊 Admin Overview</h1></div>
+      <div class="dash-grid">
+        <div class="dash-card"><div style="font-size:13px; color:var(--text-dim);">Total Users</div><div class="value" style="color:var(--primary-2);" data-stat="total-users">0</div></div>
+        <div class="dash-card"><div style="font-size:13px; color:var(--text-dim);">Active Models</div><div class="value" style="color:var(--success);" data-stat="active-models">0</div></div>
+        <div class="dash-card"><div style="font-size:13px; color:var(--text-dim);">Active Agents</div><div class="value" style="color:var(--accent);" data-stat="active-agents">0</div></div>
+        <div class="dash-card"><div style="font-size:13px; color:var(--text-dim);">Total Requests</div><div class="value" style="color:var(--warning);" data-stat="total-requests">0</div></div>
+      </div>
+      <div id="agentStatusCards" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:12px; margin-top:20px;"></div>
+    </div>
+
+    <div id="admin-models" style="display:none;">
+      <div class="dash-header"><h1>🔌 LLM Provider Management</h1></div>
+      <p style="color:var(--text-dim); margin-bottom:20px;">Enable, disable, or limit each LLM provider. Changes take effect immediately across all agents.</p>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden;">
+        <table class="admin-table">
+          <thead><tr><th>Provider</th><th>Service</th><th>Rate Limit</th><th>Status</th><th>API Key</th><th>Control</th></tr></thead>
+          <tbody id="modelTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="admin-agents" style="display:none;">
+      <div class="dash-header"><h1>🤖 Agent Management</h1></div>
+      <p style="color:var(--text-dim); margin-bottom:20px;">Control which specialized agents are available to users and their default providers.</p>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden;">
+        <table class="admin-table">
+          <thead><tr><th>Agent</th><th>Default Model</th><th>Status</th><th>Control</th></tr></thead>
+          <tbody id="agentTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="admin-users" style="display:none;">
+      <div class="dash-header"><h1>👥 User Management</h1></div>
+      <p style="color:var(--text-dim); margin-bottom:20px;">View registered users and their account details.</p>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden;">
+        <table class="admin-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Role</th><th>Created</th></tr></thead>
+          <tbody id="usersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="admin-settings" style="display:none;">
+      <div class="dash-header"><h1>⚙️ System Settings</h1></div>
+      <div style="max-width:480px;">
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px; margin-bottom:16px;">
+          <h3 style="margin-bottom:16px;">Rate Limiting</h3>
+          <div class="form-group"><label>Default Rate Limit (requests/min)</label><input type="number" class="form-input" id="defaultRateLimit" value="30" /></div>
+          <button class="btn btn-primary btn-sm mt-16" onclick="saveRateLimit()">Save</button>
+        </div>
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px; margin-bottom:16px;">
+          <h3 style="margin-bottom:16px;">Security Center</h3>
+          <p style="color:var(--text-dim); font-size:14px; margin-bottom:8px;">✅ Prompt Injection Detection (25+ patterns)</p>
+          <p style="color:var(--text-dim); font-size:14px; margin-bottom:8px;">✅ Dangerous Code Detection (15+ patterns)</p>
+          <p style="color:var(--text-dim); font-size:14px;">✅ Rate Limiter (Sliding Window)</p>
+        </div>
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px;">
+          <h3 style="margin-bottom:16px;">Danger Zone</h3>
+          <button class="btn btn-sm" style="background:var(--danger); color:#fff; border:none;" onclick="resetAll()">Reset All Data</button>
+          <p style="font-size:12px; color:var(--text-mute); margin-top:8px;">This will delete all users, models, and settings. Cannot be undone.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="admin-logs" style="display:none;">
+      <div class="dash-header"><h1>📋 Activity Log</h1></div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px;">
+        <p style="color:var(--text-dim);">System activity will be displayed here once logging is configured. Currently tracking: user registrations, model status changes, and API requests.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/js/main.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/admin.js"></script>
+<script>
+function showAdminSection(section) {
+  document.querySelectorAll('[id^="admin-"]').forEach(el => el.style.display = 'none');
+  document.getElementById(`admin-${section}`).style.display = 'block';
+  document.querySelectorAll('.dash-nav-item').forEach(n => n.classList.remove('active'));
+  event.target.classList.add('active');
+  if (section === 'models') renderModelTable();
+  if (section === 'agents') renderAgentTable();
+  if (section === 'users') renderUsersTable();
+  renderDashboardStats();
+}
+
+function saveRateLimit() {
+  alert('✅ Rate limit updated successfully! (Demo mode)');
+}
+
+function resetAll() {
+  if (confirm('⚠️ Are you sure? This will delete ALL data including users, models, and settings.')) {
+    localStorage.clear();
+    alert('All data has been reset. Redirecting to home page.');
+    window.location.href = 'index.html';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!requireAdmin()) return;
+  renderDashboardStats();
+  renderAgentStatus();
+});
+</script>
+</body>
+</html>

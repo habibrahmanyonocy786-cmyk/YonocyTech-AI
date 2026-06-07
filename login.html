@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sign In — YonocyTech</title>
+<meta name="description" content="Sign in to YonocyTech AI platform. Access 6 specialized AI agents for coding, writing, research, and more." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+<div class="cosmos"></div>
+<div class="stars"></div>
+<div class="page-wrapper">
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-brand">
+        <div class="logo">Y</div>
+        YonocyTech
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="pricing.html">Pricing</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-ghost">Sign In</a>
+        <a href="login.html#register" class="btn btn-primary btn-sm">Get Started</a>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">☰</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="auth-page">
+    <div class="auth-card animate-on-view">
+      <div class="brand">
+        <div class="logo">Y</div>
+        <h2>Welcome to YonocyTech</h2>
+        <p>Sign in to access your AI agents dashboard</p>
+      </div>
+
+      <div class="auth-tabs" id="authTabs">
+        <button class="auth-tab auth-tab-tab active" data-tab="auth-login" onclick="switchTab('auth','login')">Sign In</button>
+        <button class="auth-tab auth-tab-tab" data-tab="auth-register" onclick="switchTab('auth','register')">Create Account</button>
+      </div>
+
+      <div class="auth-form auth-content active" id="auth-login">
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" class="form-input" placeholder="your@email.com" required />
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required />
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-dim); cursor:pointer;">
+              <input type="checkbox" checked style="accent-color:var(--primary);" /> Remember me
+            </label>
+            <a href="#" style="font-size:13px;">Forgot password?</a>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">
+            Sign In →
+          </button>
+        </form>
+        <div id="loginError" style="display:none; margin-top:12px; padding:10px 14px; background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); border-radius:10px; font-size:13px; color:var(--danger);"></div>
+      </div>
+
+      <div class="auth-form auth-content" id="auth-register">
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="regName">Full Name</label>
+            <input type="text" id="regName" class="form-input" placeholder="Habibur Rahman" required />
+          </div>
+          <div class="form-group">
+            <label for="regEmail">Email</label>
+            <input type="email" id="regEmail" class="form-input" placeholder="your@email.com" required />
+          </div>
+          <div class="form-group">
+            <label for="regPassword">Password</label>
+            <input type="password" id="regPassword" class="form-input" placeholder="Min 8 characters" required minlength="8" />
+          </div>
+          <div class="form-group">
+            <label for="regConfirm">Confirm Password</label>
+            <input type="password" id="regConfirm" class="form-input" placeholder="Confirm your password" required />
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">
+            Create Account →
+          </button>
+        </form>
+        <div id="registerError" style="display:none; margin-top:12px; padding:10px 14px; background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); border-radius:10px; font-size:13px; color:var(--danger);"></div>
+        <div id="registerSuccess" style="display:none; margin-top:12px; padding:10px 14px; background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); border-radius:10px; font-size:13px; color:var(--success);"></div>
+      </div>
+
+      <div class="auth-divider">or continue with</div>
+      <div class="social-login">
+        <button class="social-btn" onclick="socialLogin('github')">⌂ GitHub</button>
+        <button class="social-btn" onclick="socialLogin('google')">G Google</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer" style="margin-top:auto;">
+    <div class="container">
+      <div class="footer-bottom">
+        <span>&copy; 2026 YonocyTech. Created by Habibur Rahman Younesi.</span>
+        <div class="footer-social">
+          <a href="https://github.com/habibrahmanyonocy786-cmyk" target="_blank" title="GitHub">⌂</a>
+          <a href="#" target="_blank" title="LinkedIn">▤</a>
+          <a href="#" target="_blank" title="Twitter / X">𝕏</a>
+          <a href="#" target="_blank" title="YouTube">▶</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/auth.js"></script>
+</body>
+</html>

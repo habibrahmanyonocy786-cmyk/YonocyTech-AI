@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard — YonocyTech AI</title>
+<meta name="description" content="Your YonocyTech AI dashboard. Access 6 specialized AI agents for coding, writing, research, and more." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+<div class="cosmos"></div>
+<div class="stars"></div>
+
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="nav-brand">
+      <div class="logo">Y</div>
+      YonocyTech
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="services.html">Services</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+    <div class="nav-actions">
+      <span style="font-size:13px; color:var(--text-dim);" id="userNameDisplay"></span>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Sign Out</button>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">☰</button>
+    </div>
+  </div>
+</nav>
+
+<div class="dashboard">
+  <aside class="dash-sidebar">
+    <div style="padding:16px 8px 8px; border-bottom:1px solid var(--border); margin-bottom:8px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="width:40px; height:40px; border-radius:10px; background:var(--gradient-brand); display:grid; place-items:center; font-size:20px; font-weight:700; color:#fff;">Y</div>
+        <div><div style="font-weight:700; font-size:15px;" id="sidebarName">User</div><div style="font-size:11px; color:var(--text-dim);" id="sidebarPlan">Free Plan</div></div>
+      </div>
+    </div>
+    <h4>Main</h4>
+    <button class="dash-nav-item active" onclick="showDashSection('overview')">📊 Overview</button>
+    <button class="dash-nav-item" onclick="showDashSection('agents')">🤖 AI Agents</button>
+    <button class="dash-nav-item" onclick="showDashSection('sessions')">💬 Sessions</button>
+    <button class="dash-nav-item" onclick="showDashSection('memory')">🧠 Memory</button>
+    <h4>Account</h4>
+    <button class="dash-nav-item" onclick="showDashSection('settings')">⚙️ Settings</button>
+    <button class="dash-nav-item" onclick="showDashSection('billing')">💰 Billing</button>
+    <h4>Admin</h4>
+    <button class="dash-nav-item" id="adminLink" onclick="window.location.href='admin.html'" style="display:none;">🔐 Admin Panel</button>
+  </aside>
+
+  <main class="dash-main">
+    <div id="dash-overview">
+      <div class="dash-header">
+        <h1>📊 Dashboard Overview</h1>
+        <span style="font-size:13px; color:var(--text-dim);">Welcome back, <strong id="welcomeName" style="color:var(--text);"></strong></span>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-card"><div style="font-size:13px; color:var(--text-dim);">AI Agents Available</div><div class="value" style="color:var(--primary-2);">6</div><div class="label">All agents online</div></div>
+        <div class="dash-card"><div style="font-size:13px; color:var(--text-dim);">Your Plan</div><div class="value" style="color:var(--success);" id="dashPlan">Free</div><div class="label" id="dashPlanDesc">30 requests/min</div></div>
+        <div class="dash-card"><div style="font-size:13px; color:var(--text-dim);">LLM Providers</div><div class="value" style="color:var(--accent);">3</div><div class="label">Auto-fallback chain</div></div>
+        <div class="dash-card"><div style="font-size:13px; color:var(--text-dim);">Status</div><div class="value" style="color:var(--success); font-size:24px;">●</div><div class="label">All systems operational</div></div>
+      </div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px;">
+        <h3 style="margin-bottom:16px;">🚀 Quick Access</h3>
+        <p style="color:var(--text-dim); margin-bottom:20px;">Launch the YonocyTech AI platform to start using all 6 specialized agents.</p>
+        <a href="https://yonocytech-ai.streamlit.app" target="_blank" class="btn btn-primary btn-lg">Launch AI Platform →</a>
+        <span style="font-size:12px; color:var(--text-mute); margin-left:12px;">Opens in new tab</span>
+      </div>
+    </div>
+
+    <div id="dash-agents" style="display:none;">
+      <div class="dash-header"><h1>🤖 AI Agents</h1></div>
+      <div id="dashAgentCards" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:16px;"></div>
+      <div style="margin-top:24px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:24px; text-align:center;">
+        <h3 style="margin-bottom:8px;">Launch Full Platform</h3>
+        <p style="color:var(--text-dim); margin-bottom:16px;">Access all agents with full features including multi-agent orchestration.</p>
+        <a href="https://yonocytech-ai.streamlit.app" target="_blank" class="btn btn-primary">Open AI Platform →</a>
+      </div>
+    </div>
+
+    <div id="dash-sessions" style="display:none;">
+      <div class="dash-header"><h1>💬 Recent Sessions</h1></div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px; text-align:center;">
+        <div style="font-size:48px; margin-bottom:16px;">💬</div>
+        <h3 style="margin-bottom:8px;">Your AI Conversations</h3>
+        <p style="color:var(--text-dim); margin-bottom:16px;">Session history is synced when you use the AI platform. Launch it to start a conversation.</p>
+        <a href="https://yonocytech-ai.streamlit.app" target="_blank" class="btn btn-primary">Start Chatting →</a>
+      </div>
+    </div>
+
+    <div id="dash-memory" style="display:none;">
+      <div class="dash-header"><h1>🧠 Memory Explorer</h1></div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px;">
+        <h3 style="margin-bottom:12px;">Hybrid Memory System</h3>
+        <p style="color:var(--text-dim); margin-bottom:16px;">YonocyTech uses a dual memory system: JSON conversation logs for session history and ChromaDB vector store for semantic recall.</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <div style="background:rgba(0,0,0,0.2); border:1px solid var(--border); border-radius:12px; padding:20px;">
+            <div style="font-size:14px; font-weight:700; margin-bottom:8px;">📋 JSON Store</div>
+            <p style="font-size:13px; color:var(--text-dim);">Conversation history with message-level timestamps, role tracking, and focus area metadata. Last 50 messages per session for optimal performance.</p>
+          </div>
+          <div style="background:rgba(0,0,0,0.2); border:1px solid var(--border); border-radius:12px; padding:20px;">
+            <div style="font-size:14px; font-weight:700; margin-bottom:8px;">🧠 ChromaDB Vector</div>
+            <p style="font-size:13px; color:var(--text-dim);">Semantic search across conversation pairs. Stores Q&A embeddings for intelligent context retrieval across sessions.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="dash-settings" style="display:none;">
+      <div class="dash-header"><h1>⚙️ Account Settings</h1></div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px; max-width:480px;">
+        <div class="form-group"><label>Full Name</label><input type="text" class="form-input" id="settingsName" /></div>
+        <div class="form-group"><label>Email</label><input type="email" class="form-input" id="settingsEmail" disabled style="opacity:0.6;" /></div>
+        <div class="form-group"><label>Plan</label><input type="text" class="form-input" id="settingsPlan" disabled style="opacity:0.6;" /></div>
+        <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
+        <div id="settingsSuccess" style="display:none; margin-top:12px; padding:10px; background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); border-radius:10px; font-size:13px; color:var(--success);">✅ Settings saved!</div>
+      </div>
+    </div>
+
+    <div id="dash-billing" style="display:none;">
+      <div class="dash-header"><h1>💰 Billing</h1></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px;">
+          <h3 style="margin-bottom:8px;">Current Plan</h3>
+          <div style="font-size:36px; font-weight:800; margin:12px 0;" id="billingPlan">Free</div>
+          <p style="color:var(--text-dim); font-size:14px;" id="billingDesc">$0/month · 30 requests/min</p>
+          <a href="pricing.html" class="btn btn-primary" style="margin-top:16px;">Upgrade Plan</a>
+        </div>
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px;">
+          <h3 style="margin-bottom:16px;">Usage This Month</h3>
+          <div class="dash-card" style="border:none; padding:0; background:transparent;">
+            <div style="font-size:13px; color:var(--text-dim);">API Requests</div>
+            <div class="value" style="font-size:28px; color:var(--primary-2);">0</div>
+          </div>
+          <div class="dash-card" style="border:none; padding:0; background:transparent; margin-top:12px;">
+            <div style="font-size:13px; color:var(--text-dim);">Cost</div>
+            <div class="value" style="font-size:28px; color:var(--success);">$0.00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/js/main.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/admin.js"></script>
+<script>
+function showDashSection(section) {
+  document.querySelectorAll('[id^="dash-"]').forEach(el => el.style.display = 'none');
+  document.getElementById(`dash-${section}`).style.display = 'block';
+  document.querySelectorAll('.dash-nav-item').forEach(n => n.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function loadDashboard() {
+  if (!requireAuth()) return;
+  const session = getSession();
+  const users = getUsers();
+  const user = users.find(u => u.email === session.email);
+  if (!user) { clearSession(); window.location.href = 'login.html'; return; }
+  const name = user.name || 'User';
+  const plan = user.plan || 'free';
+  ['userNameDisplay', 'sidebarName', 'welcomeName'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = name;
+  });
+  document.getElementById('sidebarPlan').textContent = plan === 'free' ? 'Free Plan' : plan === 'pro' ? 'Pro Plan' : 'Enterprise Plan';
+  document.getElementById('dashPlan').textContent = plan === 'free' ? 'Free' : plan === 'pro' ? 'Pro' : 'Enterprise';
+  document.getElementById('dashPlanDesc').textContent = plan === 'free' ? '30 requests/min' : plan === 'pro' ? '100 requests/min' : 'Unlimited requests';
+  document.getElementById('billingPlan').textContent = plan === 'free' ? 'Free' : plan === 'pro' ? 'Pro' : 'Enterprise';
+  document.getElementById('billingDesc').textContent = plan === 'free' ? '$0/month · 30 requests/min' : plan === 'pro' ? '$9/month · 100 requests/min' : '$29/month · Unlimited';
+  document.getElementById('settingsName').value = name;
+  document.getElementById('settingsEmail').value = user.email;
+  document.getElementById('settingsPlan').value = plan;
+  if (user.role === 'admin') document.getElementById('adminLink').style.display = 'flex';
+  const agentCards = document.getElementById('dashAgentCards');
+  if (agentCards) {
+    const agents = getAgents();
+    agentCards.innerHTML = agents.map(a => {
+      const colors = ['#00D9FF','#FF4FCB','#4ADE80','#FBBF24','#6C63FF','#00D9FF'];
+      return `<div class="agent-card" style="background:rgba(108,99,255,0.05);">
+        <div class="icon" style="background:${colors[agents.indexOf(a) % colors.length]}22;">${a.icon}</div>
+        <div class="info"><h4>${a.name}</h4><p>${a.id === 'coding' ? 'Code gen & sandbox' : a.id === 'writing' ? 'Content creation' : a.id === 'data' ? 'CSV/Excel analysis' : a.id === 'design' ? 'UI/UX specs' : a.id === 'marketing' ? 'SEO & growth' : 'Deep web research'}</p></div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function saveSettings() {
+  const name = document.getElementById('settingsName').value.trim();
+  if (!name) return;
+  const session = getSession();
+  const users = getUsers();
+  const user = users.find(u => u.email === session.email);
+  if (user) { user.name = name; saveUsers(users); saveSession(user); }
+  document.getElementById('settingsSuccess').style.display = 'block';
+  setTimeout(() => document.getElementById('settingsSuccess').style.display = 'none', 3000);
+  loadDashboard();
+}
+
+document.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
+</body>
+</html>
