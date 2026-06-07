@@ -1,0 +1,24 @@
+# Environment
+.env
+.streamlit/secrets.toml
+config/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+
+# Memory & Data
+memory/data/*.json
+chroma_data/
+*.db
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

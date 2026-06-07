@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>YonocyTech AI Agent — UI Concept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ===========================================================
+     YONOCYTECH AI — DESIGN SYSTEM
+     Dark space theme · glassmorphism · neon gradient accents
+     =========================================================== */
+  :root {
+    --bg-0: #07071A;
+    --bg-1: #0B0B24;
+    --bg-2: #11112E;
+    --bg-3: #1A1A3E;
+    --surface: rgba(20, 20, 50, 0.55);
+    --surface-2: rgba(28, 28, 65, 0.65);
+    --border: rgba(108, 99, 255, 0.18);
+    --border-strong: rgba(108, 99, 255, 0.45);
+    --text: #ECECFF;
+    --text-dim: #A5A5C7;
+    --text-mute: #6F6F95;
+    --primary: #6C63FF;       /* Indigo */
+    --primary-2: #00D9FF;     /* Cyan */
+    --accent: #FF4FCB;        /* Magenta */
+    --success: #4ADE80;
+    --warning: #FBBF24;
+    --danger:  #F87171;
+    --gradient-brand: linear-gradient(135deg, #6C63FF 0%, #00D9FF 50%, #FF4FCB 100%);
+    --gradient-soft:  linear-gradient(135deg, rgba(108,99,255,0.18), rgba(0,217,255,0.10) 60%, rgba(255,79,203,0.10));
+    --shadow-1: 0 10px 30px rgba(0,0,0,0.45);
+    --shadow-glow: 0 0 0 1px rgba(108,99,255,0.25), 0 20px 60px rgba(108,99,255,0.25);
+    --radius: 14px;
+    --radius-lg: 20px;
+    --radius-pill: 999px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--text);
+    background: var(--bg-0);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* === Animated cosmic background === */
+  .cosmos {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(1200px 800px at 15% 10%, rgba(108,99,255,0.20), transparent 60%),
+      radial-gradient(900px 700px at 90% 20%, rgba(0,217,255,0.16), transparent 60%),
+      radial-gradient(800px 600px at 50% 100%, rgba(255,79,203,0.14), transparent 60%),
+      linear-gradient(135deg, #07071A 0%, #0B0B24 50%, #11112E 100%);
+    animation: pulseBg 14s ease-in-out infinite;
+  }
+  @keyframes pulseBg {
+    0%,100% { filter: hue-rotate(0deg) brightness(1); }
+    50%     { filter: hue-rotate(15deg) brightness(1.08); }
+  }
+  .stars, .stars::before, .stars::after {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, #fff 50%, transparent 100%),
+      radial-gradient(1px 1px at 70% 80%, #fff 50%, transparent 100%),
+      radial-gradient(1px 1px at 40% 60%, #fff 50%, transparent 100%),
+      radial-gradient(2px 2px at 80% 20%, rgba(255,255,255,0.7) 50%, transparent 100%),
+      radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,0.7) 50%, transparent 100%);
+    background-size: 600px 600px;
+    animation: drift 90s linear infinite;
+    opacity: 0.6;
+  }
+  .stars::before { content:""; background-size: 400px 400px; animation-duration: 140s; opacity: 0.5; }
+  .stars::after  { content:""; background-size: 800px 800px; animation-duration: 220s; opacity: 0.4; }
+  @keyframes drift {
+    from { transform: translate3d(0,0,0); }
+    to   { transform: translate3d(-600px, 600px, 0); }
+  }
+
+  /* === Layout shell === */
+  .app {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    grid-template-rows: 64px 1fr;
+    grid-template-areas:
+      "sidebar header aside"
+      "sidebar main   aside";
+    height: 100vh;
+    gap: 0;
+  }
+
+  /* === Sidebar === */
+  .sidebar {
+    grid-area: sidebar;
+    background: linear-gradient(180deg, rgba(11,11,36,0.85), rgba(7,7,26,0.95));
+    border-right: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    padding: 20px 16px;
+    display: flex; flex-direction: column; gap: 18px;
+    animation: slideRight 0.6s ease-out;
+  }
+  @keyframes slideRight { from { transform: translateX(-20px); opacity:0; } to { transform:none; opacity:1; } }
+
+  .brand {
+    display: flex; align-items: center; gap: 10px; padding: 6px 8px;
+  }
+  .brand-logo {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--gradient-brand);
+    display: grid; place-items: center; font-size: 20px;
+    box-shadow: 0 6px 20px rgba(108,99,255,0.45);
+    position: relative;
+  }
+  .brand-logo::after{
+    content:""; position:absolute; inset:-3px; border-radius:12px;
+    background: var(--gradient-brand); filter: blur(14px); opacity:0.55; z-index:-1;
+  }
+  .brand-text { line-height: 1.1; }
+  .brand-text b { font-size: 15px; letter-spacing: 0.3px; }
+  .brand-text span { display:block; font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+  .nav-section h4 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--text-mute); margin: 14px 8px 8px; font-weight: 600;
+  }
+
+  .agent-list { display: flex; flex-direction: column; gap: 4px; }
+  .agent {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: var(--radius);
+    cursor: pointer; transition: all 0.2s ease;
+    border: 1px solid transparent;
+    position: relative;
+  }
+  .agent:hover { background: rgba(108,99,255,0.08); transform: translateX(2px); }
+  .agent.active {
+    background: linear-gradient(90deg, rgba(108,99,255,0.20), rgba(0,217,255,0.10));
+    border-color: var(--border-strong);
+    box-shadow: inset 0 0 0 1px rgba(108,99,255,0.10);
+  }
+  .agent.active::before{
+    content:""; position:absolute; left:-1px; top:8px; bottom:8px; width:3px;
+    background: var(--gradient-brand); border-radius: 2px;
+  }
+  .agent .icn {
+    width: 32px; height: 32px; border-radius: 9px; display:grid; place-items:center;
+    background: rgba(108,99,255,0.15); font-size: 16px;
+  }
+  .agent .meta b { display:block; font-size: 13px; font-weight: 600; }
+  .agent .meta span { font-size: 11px; color: var(--text-dim); }
+  .agent .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--success);
+    box-shadow: 0 0 0 3px rgba(74,222,128,0.18);
+    margin-left: auto;
+  }
+
+  .session-card {
+    margin-top: auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--gradient-brand);
+    display: grid; place-items:center; font-weight: 700; color:#fff;
+    font-size: 13px;
+  }
+  .session-card b { font-size: 13px; }
+  .session-card span { font-size: 11px; color: var(--text-dim); display:block; }
+
+  /* === Header === */
+  .header {
+    grid-area: header;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px;
+    background: rgba(11,11,36,0.55);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    animation: fadeDown 0.6s ease-out 0.1s both;
+  }
+  @keyframes fadeDown { from { transform: translateY(-12px); opacity:0;} to {transform:none; opacity:1;} }
+  .crumbs { display: flex; align-items: center; gap: 10px; }
+  .crumbs .pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 6px 12px; border-radius: var(--radius-pill);
+    font-size: 12px; color: var(--text-dim);
+  }
+  .crumbs .pill b { color: var(--text); }
+  .crumbs .sep { color: var(--text-mute); }
+
+  .header-actions { display: flex; align-items: center; gap: 10px; }
+  .icon-btn {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    display: grid; place-items: center; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .icon-btn:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+  .icon-btn .ind { position: absolute; transform: translate(10px,-10px); width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .btn-primary {
+    background: var(--gradient-brand);
+    color:#fff; border:none; padding: 9px 16px; border-radius: 10px;
+    font-weight: 600; font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 8px 24px rgba(108,99,255,0.35);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 12px 30px rgba(108,99,255,0.55); }
+
+  /* === Main chat area === */
+  .main {
+    grid-area: main;
+    display: grid; grid-template-rows: 1fr auto;
+    overflow: hidden;
+  }
+  .chat {
+    overflow-y: auto; padding: 28px 36px 12px;
+    scrollbar-width: thin; scrollbar-color: var(--bg-3) transparent;
+    animation: fadeIn 0.6s ease-out 0.2s both;
+  }
+  .chat::-webkit-scrollbar { width: 8px; }
+  .chat::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 4px; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(8px);} to {opacity:1; transform:none;} }
+
+  .welcome {
+    text-align: center; padding: 36px 8px 18px;
+  }
+  .welcome h1 {
+    font-size: 32px; margin: 0; font-weight: 800;
+    background: var(--gradient-brand);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    letter-spacing: -0.5px;
+  }
+  .welcome p { color: var(--text-dim); margin: 8px 0 0; font-size: 14px; }
+
+  .quick-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    margin: 22px 0 8px;
+  }
+  .quick {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px;
+    text-align: left; cursor: pointer; transition: all .2s;
+    color: var(--text); font-family: inherit;
+  }
+  .quick:hover { transform: translateY(-2px); border-color: var(--border-strong); box-shadow: var(--shadow-1); }
+  .quick .icn { font-size: 20px; margin-bottom: 8px; }
+  .quick b { display:block; font-size: 13px; margin-bottom: 4px; }
+  .quick span { font-size: 11.5px; color: var(--text-dim); }
+
+  /* Chat messages */
+  .msg { display: flex; gap: 12px; margin: 18px 0; align-items: flex-start; }
+  .msg .av {
+    width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+    display: grid; place-items: center; font-weight: 700; font-size: 13px;
+  }
+  .msg.user .av { background: linear-gradient(135deg, #00D9FF, #6C63FF); color: #fff; }
+  .msg.ai .av { background: var(--gradient-brand); color: #fff; box-shadow: 0 4px 18px rgba(108,99,255,0.5); }
+  .bubble {
+    max-width: 78%;
+    padding: 12px 16px; border-radius: 14px; line-height: 1.55;
+    font-size: 14px; position: relative;
+  }
+  .msg.user .bubble {
+    background: linear-gradient(135deg, rgba(0,217,255,0.18), rgba(108,99,255,0.18));
+    border: 1px solid rgba(0,217,255,0.25);
+    border-top-left-radius: 4px;
+  }
+  .msg.ai .bubble {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-top-left-radius: 4px;
+    backdrop-filter: blur(8px);
+  }
+  .bubble .who { font-size: 12px; color: var(--text-dim); margin-bottom: 4px; display: flex; gap: 8px; align-items: center; }
+  .bubble .who .tag { background: rgba(108,99,255,0.20); color: #C5C2FF; padding: 1px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 600; }
+  .bubble code { background: rgba(0,0,0,0.35); padding: 1px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #00D9FF; }
+  .bubble pre {
+    background: rgba(0,0,0,0.45); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; margin: 10px 0 4px; overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.5;
+  }
+  .msg .meta {
+    font-size: 11px; color: var(--text-mute); margin-top: 4px; display:flex; gap: 10px; align-items:center;
+  }
+  .msg .meta .chip {
+    background: rgba(108,99,255,0.10); border: 1px solid var(--border);
+    padding: 2px 8px; border-radius: 999px;
+  }
+
+  /* Typing indicator */
+  .typing { display: inline-flex; gap: 4px; padding: 4px 0; }
+  .typing span {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--primary-2);
+    animation: bounce 1.2s infinite ease-in-out;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.15s; }
+  .typing span:nth-child(3) { animation-delay: 0.30s; }
+  @keyframes bounce { 0%,80%,100% { transform: translateY(0); opacity: 0.4;} 40% { transform: translateY(-6px); opacity: 1;} }
+
+  /* Composer */
+  .composer {
+    padding: 12px 36px 22px;
+    background: linear-gradient(180deg, transparent, rgba(7,7,26,0.65));
+  }
+  .composer-inner {
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    padding: 12px 14px;
+    box-shadow: var(--shadow-glow);
+    backdrop-filter: blur(20px);
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .composer-inner:focus-within {
+    border-color: var(--primary-2);
+    box-shadow: 0 0 0 1px rgba(0,217,255,0.35), 0 20px 60px rgba(0,217,255,0.20);
+  }
+  .composer textarea {
+    width: 100%; min-height: 46px; max-height: 180px;
+    background: transparent; border: 0; outline: 0; resize: none;
+    color: var(--text); font: inherit; font-size: 14px; line-height: 1.5;
+  }
+  .composer textarea::placeholder { color: var(--text-mute); }
+  .composer-tools {
+    display: flex; align-items: center; gap: 6px; margin-top: 8px;
+  }
+  .tool-btn {
+    background: rgba(108,99,255,0.10); border: 1px solid var(--border);
+    color: var(--text-dim); padding: 6px 10px; border-radius: 8px;
+    font-size: 12px; cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tool-btn:hover { background: rgba(108,99,255,0.20); color: var(--text); }
+  .tool-btn.active { background: rgba(0,217,255,0.18); border-color: rgba(0,217,255,0.45); color: var(--text); }
+  .send-btn {
+    margin-left: auto;
+    background: var(--gradient-brand); color: #fff; border: none;
+    padding: 8px 16px; border-radius: 10px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: 6px; font-size: 13px;
+    box-shadow: 0 6px 18px rgba(108,99,255,0.4);
+    transition: transform .15s;
+  }
+  .send-btn:hover { transform: translateY(-1px); }
+  .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* === Right aside === */
+  .aside {
+    grid-area: aside;
+    background: linear-gradient(180deg, rgba(11,11,36,0.65), rgba(7,7,26,0.85));
+    border-left: 1px solid var(--border);
+    padding: 20px 16px; overflow-y: auto;
+    backdrop-filter: blur(20px);
+    animation: slideLeft 0.6s ease-out 0.15s both;
+  }
+  @keyframes slideLeft { from { transform: translateX(20px); opacity:0; } to { transform:none; opacity:1; } }
+  .panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px; margin-bottom: 14px;
+  }
+  .panel h3 {
+    margin: 0 0 10px; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .panel h3 .icn { font-size: 14px; }
+  .kv { display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0; border-bottom: 1px dashed var(--border); }
+  .kv:last-child { border-bottom: 0; }
+  .kv span { color: var(--text-dim); }
+  .kv b { color: var(--text); font-weight: 600; }
+
+  .chain-step {
+    display: flex; gap: 10px; align-items: flex-start; padding: 10px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .chain-step:last-child { border-bottom: 0; }
+  .chain-step .n {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--gradient-brand); display: grid; place-items: center;
+    font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .chain-step b { font-size: 12.5px; display: block; }
+  .chain-step span { font-size: 11px; color: var(--text-dim); }
+
+  .mem-item {
+    background: rgba(0,0,0,0.25); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; margin-bottom: 6px;
+    font-size: 11.5px; line-height: 1.4;
+  }
+  .mem-item b { color: var(--primary-2); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* === Responsive === */
+  @media (max-width: 1100px) {
+    .app { grid-template-columns: 240px 1fr; grid-template-areas: "sidebar header" "sidebar main"; }
+    .aside { display: none; }
+  }
+  @media (max-width: 720px) {
+    .app { grid-template-columns: 1fr; grid-template-areas: "header" "main"; }
+    .sidebar { display: none; }
+    .quick-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+  <div class="cosmos"></div>
+  <div class="stars"></div>
+
+  <div class="app">
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">🚀</div>
+        <div class="brand-text">
+          <b>YonocyTech AI</b>
+          <span>Low-Resource Intelligence</span>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <h4>Workspace</h4>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div class="agent active">
+            <div class="icn">💬</div>
+            <div class="meta"><b>New Chat</b><span>Start a fresh session</span></div>
+          </div>
+          <div class="agent">
+            <div class="icn">⛓️</div>
+            <div class="meta"><b>Agent Chain</b><span>Multi-agent orchestration</span></div>
+          </div>
+          <div class="agent">
+            <div class="icn">📁</div>
+            <div class="meta"><b>Files</b><span>Browse &amp; edit</span></div>
+          </div>
+          <div class="agent">
+            <div class="icn">🧠</div>
+            <div class="meta"><b>Memory</b><span>Hybrid recall</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <h4>Specialized Agents</h4>
+        <div class="agent-list">
+          <div class="agent"><div class="icn">💻</div><div class="meta"><b>Coding</b><span>Generate &amp; execute</span></div><div class="dot"></div></div>
+          <div class="agent"><div class="icn">✍️</div><div class="meta"><b>Writing</b><span>Pro &amp; creative</span></div><div class="dot"></div></div>
+          <div class="agent"><div class="icn">📊</div><div class="meta"><b>Data</b><span>CSV / Excel analysis</span></div><div class="dot"></div></div>
+          <div class="agent"><div class="icn">🎨</div><div class="meta"><b>Design</b><span>UI / UX specs</span></div><div class="dot"></div></div>
+          <div class="agent"><div class="icn">📈</div><div class="meta"><b>Marketing</b><span>SEO &amp; growth</span></div><div class="dot"></div></div>
+          <div class="agent"><div class="icn">🔍</div><div class="meta"><b>Research</b><span>Deep web + citations</span></div><div class="dot"></div></div>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <h4>Sessions</h4>
+        <div class="agent"><div class="icn">📝</div><div class="meta"><b>Refactor auth module</b><span>2 min ago</span></div></div>
+        <div class="agent"><div class="icn">📝</div><div class="meta"><b>Sales Q3 report</b><span>Yesterday</span></div></div>
+        <div class="agent"><div class="icn">📝</div><div class="meta"><b>Landing page copy</b><span>3 days ago</span></div></div>
+      </div>
+
+      <div class="session-card">
+        <div class="avatar">HR</div>
+        <div>
+          <b>Habibur Rahman</b>
+          <span>Free tier · 0$</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ============ HEADER ============ -->
+    <header class="header">
+      <div class="crumbs">
+        <div class="pill"><b>Chat</b></div>
+        <span class="sep">›</span>
+        <div class="pill">General Assistant</div>
+        <span class="sep">·</span>
+        <div class="pill" style="border-color: rgba(74,222,128,0.45); color:#4ADE80;">● Online</div>
+      </div>
+      <div class="header-actions">
+        <div class="icon-btn" title="Notifications">🔔<div class="ind"></div></div>
+        <div class="icon-btn" title="Settings">⚙️</div>
+        <button class="btn-primary">＋ New Session</button>
+      </div>
+    </header>
+
+    <!-- ============ MAIN ============ -->
+    <main class="main">
+      <div class="chat">
+
+        <div class="welcome">
+          <h1>How can I help you ship today?</h1>
+          <p>Ask anything · chain specialized agents · or pick a quick starter below.</p>
+        </div>
+
+        <div class="quick-grid">
+          <button class="quick"><div class="icn">💡</div><b>Brainstorm ideas</b><span>Generate 10 concepts for a SaaS landing page</span></button>
+          <button class="quick"><div class="icn">🧪</div><b>Explain code</b><span>Walk me through this Python script step by step</span></button>
+          <button class="quick"><div class="icn">📊</div><b>Analyze data</b><span>Summarize trends from this CSV file</span></button>
+          <button class="quick"><div class="icn">✍️</div><b>Write content</b><span>Draft a launch announcement in Persian &amp; English</span></button>
+        </div>
+
+        <!-- USER MESSAGE -->
+        <div class="msg user">
+          <div class="av">HR</div>
+          <div>
+            <div class="bubble">
+              سلام، لطفاً یک کامپوننت React برای کارت محصول بنویس که با <code>Tailwind</code> استایل بشه و از <code>TypeScript</code> استفاده کنه. ریسپانسیو باشه.
+            </div>
+            <div class="meta"><span class="chip">Coding Agent</span> · 14:32</div>
+          </div>
+        </div>
+
+        <!-- AI MESSAGE -->
+        <div class="msg ai">
+          <div class="av">Y</div>
+          <div>
+            <div class="bubble">
+              <div class="who">YonocyTech AI <span class="tag">Coding</span></div>
+              حتماً. این یک کامپوننت <code>ProductCard</code> ریسپانسیو و ماژولار است:
+              <pre>// components/ProductCard.tsx
+import Image from "next/image";
+import { Heart, ShoppingCart } from "lucide-react";
+
+interface Props {
+  title: string;
+  price: number;
+  image: string;
+  rating: number;
+}
+
+export function ProductCard({ title, price, image, rating }: Props) {
+  return (
+    &lt;div className="group rounded-2xl bg-white/5 backdrop-blur p-4
+                    border border-white/10 hover:border-indigo-400/50
+                    transition-all duration-300 hover:-translate-y-1"&gt;
+      &lt;div className="relative aspect-square overflow-hidden rounded-xl"&gt;
+        &lt;Image src={image} alt={title} fill className="object-cover
+                 group-hover:scale-105 transition-transform duration-500" /&gt;
+      &lt;/div&gt;
+      &lt;h3 className="mt-3 font-semibold text-white"&gt;{title}&lt;/h3&gt;
+      &lt;div className="mt-2 flex items-center justify-between"&gt;
+        &lt;span className="text-indigo-300 font-bold"&gt;${price}&lt;/span&gt;
+        &lt;div className="flex gap-2"&gt;
+          &lt;button className="p-2 rounded-lg bg-white/5 hover:bg-pink-500/20"&gt;
+            &lt;Heart size={16} /&gt;
+          &lt;/button&gt;
+          &lt;button className="p-2 rounded-lg bg-indigo-500 hover:bg-indigo-400"&gt;
+            &lt;ShoppingCart size={16} /&gt;
+          &lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}</pre>
+              این کامپوننت کاملاً ریسپانسیو، با glassmorphism و انیمیشن hover است.
+            </div>
+            <div class="meta">
+              <span class="chip">⚡ openrouter · qwen-2.5-coder</span>
+              <span class="chip">🛡️ safe</span>
+              <span class="chip">⏱ 1.4s · 412 tokens</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI TYPING -->
+        <div class="msg ai">
+          <div class="av">Y</div>
+          <div>
+            <div class="bubble">
+              <div class="who">YonocyTech AI <span class="tag">Data</span></div>
+              <span style="color: var(--text-dim); font-size:13px;">Analyzing your CSV…</span>
+              <div class="typing" style="margin-top:6px;"><span></span><span></span><span></span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- COMPOSER -->
+      <div class="composer">
+        <div class="composer-inner">
+          <textarea placeholder="Message YonocyTech AI…   (Shift+Enter for new line)"></textarea>
+          <div class="composer-tools">
+            <button class="tool-btn">📎 Attach</button>
+            <button class="tool-btn">🎙️ Voice</button>
+            <button class="tool-btn active">🌐 Web search</button>
+            <button class="tool-btn">🖼️ Image</button>
+            <button class="tool-btn">🧠 Memory</button>
+            <button class="send-btn">Send ➤</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ============ ASIDE ============ -->
+    <aside class="aside">
+
+      <div class="panel">
+        <h3><span class="icn">📡</span> Active Provider</h3>
+        <div class="kv"><span>Primary</span><b>OpenRouter</b></div>
+        <div class="kv"><span>Model</span><b>qwen-2.5-coder</b></div>
+        <div class="kv"><span>Fallback 1</span><b>HuggingFace</b></div>
+        <div class="kv"><span>Fallback 2</span><b>GitHub Models</b></div>
+        <div class="kv"><span>Status</span><b style="color:#4ADE80;">● Healthy</b></div>
+      </div>
+
+      <div class="panel">
+        <h3><span class="icn">⛓️</span> Current Chain</h3>
+        <div class="chain-step"><div class="n">1</div><div><b>Research</b><span>Fetch latest AI trends</span></div></div>
+        <div class="chain-step"><div class="n">2</div><div><b>Writing</b><span>Draft executive summary</span></div></div>
+        <div class="chain-step"><div class="n">3</div><div><b>Design</b><span>Generate slide visuals</span></div></div>
+      </div>
+
+      <div class="panel">
+        <h3><span class="icn">🧠</span> Memory Recall</h3>
+        <div class="mem-item"><b>Vector</b><br/>"User prefers TypeScript + Tailwind"</div>
+        <div class="mem-item"><b>Vector</b><br/>"Project: YonocyTech AI v2.0"</div>
+        <div class="mem-item"><b>JSON</b><br/>"12 messages in current session"</div>
+      </div>
+
+      <div class="panel">
+        <h3><span class="icn">📊</span> Session Stats</h3>
+        <div class="kv"><span>Tokens used</span><b>2,847</b></div>
+        <div class="kv"><span>Cost</span><b style="color:#4ADE80;">$0.00</b></div>
+        <div class="kv"><span>Latency avg</span><b>1.2s</b></div>
+        <div class="kv"><span>Injections blocked</span><b style="color:#F87171;">3</b></div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    // Subtle interactive: click agent -> active
+    document.querySelectorAll('.agent').forEach(el => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.agent').forEach(a => a.classList.remove('active'));
+        el.classList.add('active');
+      });
+    });
+    // Quick prompt autofill
+    document.querySelectorAll('.quick').forEach(q => {
+      q.addEventListener('click', () => {
+        const txt = q.querySelector('span').textContent;
+        document.querySelector('.composer textarea').value = txt;
+        document.querySelector('.composer textarea').focus();
+      });
+    });
+  </script>
+</body>
+</html>
