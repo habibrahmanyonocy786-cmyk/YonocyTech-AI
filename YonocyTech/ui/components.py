@@ -269,6 +269,14 @@ code, pre, .stCode {
 .status-warn   { color: var(--warning); }
 .status-error  { color: var(--danger); }
 
+/* Key-value row for aside panels */
+.kv { display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:12px; border-bottom:1px solid rgba(108,99,255,0.08); }
+.kv span { color:var(--text-dim); }
+.kv b { color:var(--text); font-weight:600; }
+
+/* Contact form */
+.contact-form { max-width:500px; margin:0 auto; }
+
 /* Hide Streamlit branding */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}

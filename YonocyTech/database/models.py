@@ -1,6 +1,6 @@
-import hashlib
 import datetime
 from typing import List, Optional, Dict, Any
+import bcrypt
 from database import get_connection
 
 
@@ -9,7 +9,11 @@ from database import get_connection
 # ─────────────────────────────────────────────
 
 def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+
+def check_password(password: str, hashed: str) -> bool:
+    return bcrypt.checkpw(password.encode(), hashed.encode())
 
 
 def create_user(name: str, email: str, password: str) -> Optional[Dict]:
@@ -37,10 +41,10 @@ def authenticate(email: str, password: str) -> Optional[Dict]:
     conn = get_connection()
     try:
         user = conn.execute(
-            "SELECT * FROM users WHERE email = ? AND password = ? AND is_active = 1",
-            (email, hash_password(password))
+            "SELECT * FROM users WHERE email = ? AND is_active = 1",
+            (email,)
         ).fetchone()
-        if user:
+        if user and check_password(password, user["password"]):
             conn.execute(
                 "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?",
                 (user["id"],)

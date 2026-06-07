@@ -14,10 +14,11 @@ from dotenv import load_dotenv
 load_dotenv("config/.env")
 load_dotenv()
 
-# Initialize SQLite database
+# Initialize SQLite database (runs once at import)
+# Migration is idempotent: only runs if schema version < current
 os.environ.setdefault("DATABASE_URL", "sqlite")
-from database.schema import migrate
-migrate()
+from database.schema import migrate as _migrate_db
+_migrate_db()
 
 # ----------------------------------------------------------------------------
 # DATA MODELS
@@ -339,6 +340,17 @@ class YonocyTech:
                   session_id: Optional[str] = None) -> AgentResponse:
         if not prompt:
             raise ValueError("Prompt cannot be empty")
+
+        from security.guard import detect_injection, sanitize_input
+
+        injection_detected, pattern = detect_injection(prompt)
+        if injection_detected:
+            return AgentResponse(
+                text=f"Prompt blocked: injection pattern detected ({pattern}). Your message was not processed.",
+                model="N/A", provider="SecurityGuard"
+            )
+
+        prompt = sanitize_input(prompt)
 
         sid = session_id or self.session_id or self.memory.new_session()
         self.session_id = sid

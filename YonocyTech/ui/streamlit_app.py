@@ -23,6 +23,7 @@ from core import YonocyTech, register_user, login_user, get_db_providers, get_db
 from agents import ALL_AGENTS
 from tools.file_manager import FileManager
 from tools.orchestrator import Orchestrator
+from security.guard import RateLimiter, sanitize_input
 from database.models import (
     get_all_providers, update_provider_status, update_provider_rate_limit,
     get_all_agents, update_agent_status, update_agent_provider,
@@ -62,6 +63,9 @@ apply_theme()
 # ----------------------------------------------------------------------------
 # AUTH STATE
 # ----------------------------------------------------------------------------
+if "login_limiter" not in st.session_state:
+    st.session_state.login_limiter = RateLimiter(max_requests=10, window_seconds=300)
+
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
     st.session_state.user = None
@@ -90,6 +94,12 @@ if not st.session_state.logged_in:
 
     tab = st.tabs(["Sign In", "Create Account"])
     with tab[0]:
+        ip_key = st.session_state.get("client_ip", "web")
+        if not st.session_state.login_limiter.is_allowed(ip_key):
+            remaining = st.session_state.login_limiter.remaining(ip_key)
+            st.error(f"Too many login attempts. Try again in {remaining * 30} seconds.")
+            st.stop()
+
         with st.form("login_form"):
             l_email = st.text_input("Email", placeholder="your@email.com")
             l_pass = st.text_input("Password", type="password")
@@ -101,6 +111,7 @@ if not st.session_state.logged_in:
                     st.session_state.show_login = False
                     st.rerun()
                 else:
+                    st.session_state.login_limiter.is_allowed(ip_key)
                     st.error("Invalid email or password.")
     with tab[1]:
         with st.form("register_form"):
@@ -113,7 +124,10 @@ if not st.session_state.logged_in:
                     st.error("Passwords do not match.")
                 elif len(r_pass) < 4:
                     st.error("Password must be at least 4 characters.")
+                elif len(r_email) > 320 or "@" not in r_email:
+                    st.error("Invalid email address.")
                 else:
+                    r_name = sanitize_input(r_name, max_length=100)
                     user = register_user(r_name, r_email, r_pass)
                     if user:
                         st.session_state.logged_in = True
@@ -175,7 +189,7 @@ with st.sidebar:
         "color:var(--text-mute); margin:14px 8px 8px; font-weight:600;'>Workspace</h4>",
         unsafe_allow_html=True,
     )
-    nav_pages = [("Chat", "💬"), ("Agent Chain", "⛓️"), ("Files", "📁"), ("Memory", "🧠")]
+    nav_pages = [("Chat", "💬"), ("Agent Chain", "⛓️"), ("Files", "📁"), ("Memory", "🧠"), ("Contact", "📬")]
     if user.get("role") == "admin":
         nav_pages.append(("Admin Panel", "🔐"))
     for page, icon in nav_pages:
@@ -213,7 +227,7 @@ with st.sidebar:
         st.session_state.messages = []
         st.rerun()
 
-    render_session_card()
+    render_session_card(user_name=user["name"], tier=user.get("plan", "free"))
 
     if st.button("🚪  Sign Out", key="signout", use_container_width=True):
         st.session_state.logged_in = False
@@ -369,6 +383,33 @@ with main_col:
             st.metric("Total messages", sum(s["count"] for s in sessions))
         except Exception:
             st.info("Memory stats unavailable.")
+
+    elif st.session_state.current_page == "Contact":
+        st.markdown(
+            "<h2 style='margin:6px 0 4px; font-size:20px;'>📬 Contact Us</h2>"
+            "<p style='color:var(--text-dim); font-size:13px; margin:0 0 16px;'>"
+            "Send a message to the YonocyTech team.</p>",
+            unsafe_allow_html=True,
+        )
+        with st.form("contact_form", clear_on_submit=True):
+            c_name = st.text_input("Your Name", value=st.session_state.user.get("name", ""))
+            c_email = st.text_input("Your Email", value=st.session_state.user.get("email", ""))
+            c_subject = st.text_input("Subject", placeholder="What is this about?")
+            c_message = st.text_area("Message", placeholder="Describe your question, feedback, or issue...", height=150)
+            if st.form_submit_button("📨  Send Message", use_container_width=True):
+                if not c_message.strip():
+                    st.error("Message cannot be empty.")
+                else:
+                    success = save_contact_message(
+                        sanitize_input(c_name, 100),
+                        sanitize_input(c_email, 320),
+                        sanitize_input(c_subject, 200),
+                        sanitize_input(c_message, 5000),
+                    )
+                    if success:
+                        st.success("Message sent successfully! We'll get back to you soon.")
+                    else:
+                        st.error("Failed to send message. Please try again.")
 
     elif st.session_state.current_page == "Admin Panel":
         user = st.session_state.user

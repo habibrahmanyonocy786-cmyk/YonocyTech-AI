@@ -1,6 +1,6 @@
 from database import get_connection
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 def migrate():
@@ -19,7 +19,24 @@ def migrate():
         return
 
     _create_tables(cursor)
-    _seed_defaults(cursor)
+
+    if current is None:
+        _seed_defaults(cursor)
+
+    if current == 1:
+        from database.models import hash_password
+        rows = cursor.execute(
+            "SELECT id, password FROM users WHERE length(password) = 64"
+        ).fetchall()
+        for row in rows:
+            try:
+                bytes.fromhex(row["password"])
+                new_hash = hash_password("migrate_reset_needed")
+                cursor.execute(
+                    "UPDATE users SET password = ? WHERE id = ?", (new_hash, row["id"])
+                )
+            except ValueError:
+                pass
 
     cursor.execute("INSERT INTO schema_version (version) VALUES (?)", (SCHEMA_VERSION,))
     conn.commit()
