@@ -1,0 +1,12 @@
+.git/
+.gitignore
+__pycache__/
+*.db
+*.json
+chroma_data/
+.env
+secrets.toml
+venv/
+.venv/
+node_modules/
+dist/

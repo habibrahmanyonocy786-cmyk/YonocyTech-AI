@@ -22,7 +22,7 @@ api = HfApi()
 api.create_repo(
     repo_id='$SPACE_NAME',
     repo_type='space',
-    space_sdk='streamlit',
+    space_sdk='docker',
     exist_ok=True
 )
 api.upload_folder(
@@ -33,4 +33,13 @@ api.upload_folder(
     ignore_patterns=['.git/*', '__pycache__/*', '*.db', '*.json', 'chroma_data/*', '.env', 'secrets.toml']
 )
 print('Deployed to https://huggingface.co/spaces/$SPACE_NAME')
+"
+
+      - name: Set sync hardware
+        run: |
+          pip install huggingface_hub
+          python -c "
+from huggingface_hub import HfApi
+api = HfApi()
+api.request_space_hardware('$SPACE_NAME', 'cpu-basic')
 "
