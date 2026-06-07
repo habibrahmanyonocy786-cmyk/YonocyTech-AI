@@ -12,9 +12,12 @@ import streamlit as st
 import asyncio
 
 # Load API keys from Streamlit secrets (Streamlit Cloud) into env
-for _key in ["OPENROUTER_API_KEY", "HF_API_KEY", "GITHUB_TOKEN", "DEEPAI_API_KEY"]:
-    if _key in st.secrets:
-        os.environ[_key] = st.secrets[_key]
+try:
+    for _key in ["OPENROUTER_API_KEY", "HF_API_KEY", "GITHUB_TOKEN", "DEEPAI_API_KEY"]:
+        if _key in st.secrets:
+            os.environ[_key] = st.secrets[_key]
+except Exception:
+    pass  # No secrets file; API keys should be in .env or env vars
 
 from core import YonocyTech, register_user, login_user, get_db_providers, get_db_agents
 from agents import ALL_AGENTS
