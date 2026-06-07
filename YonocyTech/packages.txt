@@ -1,3 +1,2 @@
 # System dependencies for Streamlit Cloud (apt packages)
-# ChromaDB may need libsqlite3-0; uncomment if deployment fails:
-# libsqlite3-0
+libsqlite3-0

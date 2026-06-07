@@ -1,0 +1,36 @@
+name: Deploy to HF Spaces
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SPACE_NAME: "habibrahmanyonocy/YonocyTech-AI"
+        run: |
+          pip install huggingface_hub
+          python -c "
+from huggingface_hub import HfApi
+api = HfApi()
+api.create_repo(
+    repo_id='$SPACE_NAME',
+    repo_type='space',
+    space_sdk='streamlit',
+    exist_ok=True
+)
+api.upload_folder(
+    folder_path='.',
+    repo_id='$SPACE_NAME',
+    repo_type='space',
+    path_in_repo='.',
+    ignore_patterns=['.git/*', '__pycache__/*', '*.db', '*.json', 'chroma_data/*', '.env', 'secrets.toml']
+)
+print('Deployed to https://huggingface.co/spaces/$SPACE_NAME')
+"
