@@ -35,6 +35,15 @@ st.set_page_config(
 )
 
 apply_theme()
+
+# Inject Vercel Web Analytics
+st.markdown("""
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+""", unsafe_allow_html=True)
+
 t = Translator()
 
 # ----------------------------------------------------------------------------
