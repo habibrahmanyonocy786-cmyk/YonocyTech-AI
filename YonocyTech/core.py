@@ -189,6 +189,43 @@ class GitHubModelsProvider:
             latency_ms=latency,
         )
 
+class DeepSeekProvider:
+    def __init__(self):
+        self.api_key = os.getenv("HF_API_KEY") or os.getenv("HF_TOKEN")
+        self.model = os.getenv("DEEPSEEK_MODEL", "deepseek-ai/DeepSeek-V4-Pro")
+        self.url = f"https://api-inference.huggingface.co/models/{self.model}/v1/chat/completions"
+
+    @property
+    def is_available(self) -> bool:
+        return bool(self.api_key)
+
+    async def ask(self, messages: List[Dict[str, str]], max_tokens: int = 2048) -> AgentResponse:
+        start_time = time.time()
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        body = {
+            "model": self.model,
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "temperature": 0.7,
+        }
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            response = await client.post(self.url, headers=headers, json=body)
+            data = response.json()
+            if response.status_code != 200:
+                error_detail = data.get("error", {}).get("message", str(data))
+                raise Exception(error_detail)
+        latency = (time.time() - start_time) * 1000
+        return AgentResponse(
+            text=data["choices"][0]["message"]["content"],
+            model=self.model,
+            provider="DeepSeek",
+            tokens_used=data.get("usage", {}).get("total_tokens", 0),
+            latency_ms=latency,
+        )
+
 # ----------------------------------------------------------------------------
 # MEMORY SYSTEM
 # ----------------------------------------------------------------------------
@@ -338,6 +375,7 @@ class YonocyTech:
 
         provider_map = {
             "openrouter": OpenRouterProvider(),
+            "deepseek": DeepSeekProvider(),
             "huggingface": HuggingFaceProvider(),
             "github-models": GitHubModelsProvider(),
         }

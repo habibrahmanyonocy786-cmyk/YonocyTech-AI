@@ -136,10 +136,12 @@ def _seed_defaults(cursor):
         INSERT OR IGNORE INTO providers (id, name, status, rate_limit, priority, api_key_set)
         VALUES (?, ?, ?, ?, ?, ?)
     """, [
-        ("openrouter",    "OpenRouter (Primary)",     "active", 30, 1, 0),
-        ("huggingface",   "HuggingFace Inference",    "active", 20, 2, 0),
-        ("github-models", "GitHub Models (Azure AI)", "active", 25, 3, 0),
-        ("deepai",        "DeepAI Image Generation",  "active", 10, 4, 0),
+        ("openrouter",    "OpenRouter (Primary)",       "active", 30, 1, 0),
+        ("deepseek",      "DeepSeek-V4-Pro (HF)",       "active", 25, 2, 0),
+        ("huggingface",   "HuggingFace Inference",      "active", 20, 3, 0),
+        ("github-models", "GitHub Models (Azure AI)",   "active", 25, 4, 0),
+        ("deepai",        "DeepAI Image Generation",    "active", 10, 5, 0),
+        ("hf-fal",        "HF fal-ai Image Generation", "active", 10, 6, 0),
     ])
 
     cursor.executemany("""
