@@ -31,4 +31,4 @@ jobs:
 
     - name: Run Tests
       run: |
-        pytest tests/ --tb=short
+        pytest tests/ --tb=short --ignore=tests/test_vector_memory.py

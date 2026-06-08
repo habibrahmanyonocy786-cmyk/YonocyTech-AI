@@ -261,7 +261,7 @@ class YonocyTech:
     """
     The main AI Agent class orchestrating providers and memory.
     """
-    FOCUS_AREAS = ["coding", "writing", "product", "data", "design", "marketing", "ops", "research"]
+    FOCUS_AREAS = ["coding", "writing", "product", "data", "design", "marketing", "ops", "research", "summarizer", "tutor"]
 
     SYSTEM_PROMPTS = {
         "coding": "You are an expert software engineer. Provide clean, efficient, and well-documented code. Always prioritize security and performance.",
@@ -272,6 +272,8 @@ class YonocyTech:
         "marketing": "You are a growth marketing expert. Focus on SEO, conversion rates, KPI tracking, and high-impact channel strategies.",
         "ops": "You are a DevOps engineer. Focus on scalability, CI/CD pipelines, security, and infrastructure as code.",
         "research": "You are a detailed research analyst. Provide comprehensive summaries with clear citations [1], [2] and evidence-based conclusions.",
+        "summarizer": "You are an expert text summarizer. Your task is to distill long texts into clear, concise summaries while preserving all key information. Adapt your summary length based on the user's request (short, medium, or detailed). Always maintain accuracy and never add information not present in the original text.",
+        "tutor": "You are a patient and encouraging programming tutor. You explain concepts clearly, provide relevant examples, and guide learners through challenges. Adapt your explanations to the user's skill level. Use analogies and real-world examples to make complex topics accessible.",
         "default": "You are YonocyTech AI, a highly capable assistant. Be helpful, precise, and objective."
     }
 
@@ -284,11 +286,12 @@ class YonocyTech:
         self.session_id = None
 
     def _init_providers(self) -> None:
-        # Priority: OpenRouter > HuggingFace > GitHubModels
+        from integrations.ollama_provider import OllamaProvider
         potential_providers = [
             OpenRouterProvider(),
             HuggingFaceProvider(),
             GitHubModelsProvider(),
+            OllamaProvider(),
         ]
         self.providers = [p for p in potential_providers if p.is_available]
 

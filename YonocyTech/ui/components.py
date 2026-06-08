@@ -1,17 +1,11 @@
-"""
-YonocyTech AI — UI Design System v2.0
-Reusable Streamlit components aligned with docs/ui-spec.md.
-"""
 import streamlit as st
 from core import AgentResponse
+from i18n.translator import Translator
 
 
-# ----------------------------------------------------------------------------
-# DESIGN TOKENS & GLOBAL THEME
-# ----------------------------------------------------------------------------
 THEME_CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Vazirmatn:wght@300;400;500;600;700;800&display=swap');
 
 :root {
     --bg-0: #07071A;
@@ -36,16 +30,78 @@ THEME_CSS = """
 }
 
 html, body, [class*="css"] {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    font-family: 'Inter', 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
 }
 
+/* === Cosmic Background === */
 .stApp {
     background:
-        radial-gradient(1200px 800px at 15% 10%, rgba(108,99,255,0.20), transparent 60%),
-        radial-gradient(900px 700px at 90% 20%, rgba(0,217,255,0.16), transparent 60%),
-        radial-gradient(800px 600px at 50% 100%, rgba(255,79,203,0.14), transparent 60%),
+        radial-gradient(ellipse 1200px 800px at 15% 10%, rgba(108,99,255,0.20), transparent 60%),
+        radial-gradient(ellipse 900px 700px at 90% 20%, rgba(0,217,255,0.16), transparent 60%),
+        radial-gradient(ellipse 800px 600px at 50% 100%, rgba(255,79,203,0.14), transparent 60%),
         linear-gradient(135deg, #07071A 0%, #0B0B24 50%, #11112E 100%) !important;
     color: var(--text);
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Star field layers */
+.stApp::before,
+.stApp::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+.stApp::before {
+    background-image:
+        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1.5px 1.5px at 50% 10%, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1.5px 1.5px at 85% 70%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 45% 45%, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 90% 15%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1.5px 1.5px at 60% 80%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 25% 35%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 5% 55%, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1.5px 1.5px at 75% 90%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 40% 75%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 95% 50%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1.5px 1.5px at 55% 30%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 20% 5%, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 65% 5%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1.5px 1.5px at 35% 95%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 80% 60%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 0% 40%, rgba(255,255,255,0.3), transparent);
+    animation: starDrift1 90s linear infinite;
+    opacity: 0.7;
+}
+.stApp::after {
+    background-image:
+        radial-gradient(1px 1px at 12% 35%, rgba(200,200,255,0.4), transparent),
+        radial-gradient(1px 1px at 55% 65%, rgba(200,200,255,0.3), transparent),
+        radial-gradient(1px 1px at 78% 22%, rgba(200,200,255,0.5), transparent),
+        radial-gradient(1px 1px at 33% 88%, rgba(200,200,255,0.3), transparent),
+        radial-gradient(1px 1px at 92% 45%, rgba(200,200,255,0.4), transparent),
+        radial-gradient(1px 1px at 48% 15%, rgba(200,200,255,0.5), transparent),
+        radial-gradient(1px 1px at 18% 72%, rgba(200,200,255,0.3), transparent),
+        radial-gradient(1px 1px at 68% 50%, rgba(200,200,255,0.4), transparent),
+        radial-gradient(1px 1px at 40% 42%, rgba(200,200,255,0.3), transparent);
+    animation: starDrift2 140s linear infinite;
+    opacity: 0.4;
+}
+
+/* Star drift animations */
+@keyframes starDrift1 {
+    from { transform: translateY(0) translateX(0); }
+    to   { transform: translateY(-200px) translateX(50px); }
+}
+@keyframes starDrift2 {
+    from { transform: translateY(0) translateX(0); }
+    to   { transform: translateY(-150px) translateX(-30px); }
 }
 
 h1, h2, h3, h4, h5, h6, p, span, label, li, div {
@@ -56,6 +112,18 @@ h1, h2, h3, h4, h5, h6, p, span, label, li, div {
 [data-testid="stSidebar"] {
     background: linear-gradient(180deg, rgba(11,11,36,0.92), rgba(7,7,26,0.97)) !important;
     border-right: 1px solid var(--border) !important;
+    z-index: 1;
+}
+
+/* === RTL Support === */
+.rtl {
+    direction: rtl !important;
+    text-align: right !important;
+    font-family: 'Vazirmatn', 'Inter', sans-serif !important;
+}
+.ltr {
+    direction: ltr !important;
+    text-align: left !important;
 }
 
 /* === Inputs === */
@@ -74,7 +142,6 @@ h1, h2, h3, h4, h5, h6, p, span, label, li, div {
     box-shadow: 0 0 0 2px rgba(0,217,255,0.25) !important;
 }
 
-/* === Selectbox === */
 .stSelectbox > div > div {
     background-color: rgba(17,17,46,0.7) !important;
     border: 1px solid var(--border) !important;
@@ -92,15 +159,15 @@ h1, h2, h3, h4, h5, h6, p, span, label, li, div {
     font-size: 13px !important;
     padding: 8px 18px !important;
     box-shadow: 0 8px 24px rgba(108,99,255,0.35) !important;
+    transform: translateY(0);
     transition: transform .2s, box-shadow .2s !important;
 }
 .stButton > button:hover {
-    transform: translateY(-1px) !important;
+    transform: translateY(-2px) !important;
     box-shadow: 0 12px 30px rgba(108,99,255,0.55) !important;
 }
 .stButton > button:focus { outline: 2px solid var(--primary-2) !important; outline-offset: 2px; }
 
-/* Secondary buttons */
 .stDownloadButton > button {
     background: rgba(108,99,255,0.15) !important;
     color: var(--text) !important;
@@ -109,10 +176,7 @@ h1, h2, h3, h4, h5, h6, p, span, label, li, div {
 }
 
 /* === Tabs === */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 4px;
-    background: transparent;
-}
+.stTabs [data-baseweb="tab-list"] { gap: 4px; background: transparent; }
 .stTabs [data-baseweb="tab"] {
     background: transparent !important;
     color: var(--text-dim) !important;
@@ -151,9 +215,7 @@ code, pre, .stCode {
 }
 
 /* === Spinner === */
-.stSpinner > div {
-    border-top-color: var(--primary-2) !important;
-}
+.stSpinner > div { border-top-color: var(--primary-2) !important; }
 
 /* === Toast / alerts === */
 .stAlert {
@@ -163,7 +225,6 @@ code, pre, .stCode {
     color: var(--text) !important;
 }
 
-/* === Chat messages (st.chat_message) === */
 [data-testid="stChatMessage"] {
     background: var(--surface-2) !important;
     border: 1px solid var(--border) !important;
@@ -197,7 +258,7 @@ code, pre, .stCode {
     line-height: 1.55;
 }
 
-/* === Metadata chips === */
+/* === Meta chips === */
 .meta-chip {
     display: inline-block;
     background: rgba(108,99,255,0.10);
@@ -229,20 +290,46 @@ code, pre, .stCode {
     backdrop-filter: blur(10px);
 }
 
-/* === Animations === */
-@keyframes fadeIn { from { opacity:0; transform: translateY(8px);} to {opacity:1; transform:none;} }
+/* === Improved Animations === */
+@keyframes fadeIn {
+    from { opacity:0; transform: translateY(10px); }
+    to { opacity:1; transform: translateY(0); }
+}
 .fade-in { animation: fadeIn 0.5s ease-out both; }
 
-@keyframes slideRight { from { transform: translateX(-20px); opacity:0; } to { transform:none; opacity:1; } }
-.slide-right { animation: slideRight 0.6s ease-out both; }
+@keyframes slideInLeft {
+    from { transform: translateX(-30px); opacity:0; }
+    to { transform: translateX(0); opacity:1; }
+}
+.slide-left { animation: slideInLeft 0.6s ease-out both; }
+
+@keyframes slideInRight {
+    from { transform: translateX(30px); opacity:0; }
+    to { transform: translateX(0); opacity:1; }
+}
+.slide-right { animation: slideInRight 0.6s ease-out both; }
 
 @keyframes pulseGlow {
     0%,100% { box-shadow: 0 0 0 0 rgba(0,217,255,0.4); }
-    50%     { box-shadow: 0 0 0 8px rgba(0,217,255,0); }
+    50%     { box-shadow: 0 0 0 10px rgba(0,217,255,0); }
 }
 .pulse { animation: pulseGlow 2s ease-in-out infinite; }
 
-@keyframes typingBounce { 0%,80%,100% { transform: translateY(0); opacity: 0.4;} 40% { transform: translateY(-6px); opacity: 1;} }
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+.skeleton {
+    background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+}
+
+@keyframes typingBounce {
+    0%,80%,100% { transform: translateY(0); opacity: 0.4; }
+    40% { transform: translateY(-6px); opacity: 1; }
+}
 .typing-dot {
     display:inline-block; width:6px; height:6px; border-radius:50%;
     background: var(--primary-2); margin: 0 2px;
@@ -269,6 +356,55 @@ code, pre, .stCode {
 .status-warn   { color: var(--warning); }
 .status-error  { color: var(--danger); }
 
+/* === Skeleton loader === */
+.skeleton-card {
+    height: 80px;
+    margin-bottom: 12px;
+}
+.skeleton-line {
+    height: 14px;
+    margin-bottom: 8px;
+    width: 100%;
+}
+.skeleton-line:nth-child(2) { width: 75%; }
+.skeleton-line:nth-child(3) { width: 50%; }
+
+/* === Language Switcher === */
+.lang-switcher {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: rgba(108,99,255,0.1);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .2s;
+}
+.lang-switcher:hover {
+    background: rgba(108,99,255,0.2);
+}
+
+/* === Responsive === */
+@media (max-width: 1100px) {
+    .aside-panel { display: none !important; }
+}
+@media (max-width: 720px) {
+    [data-testid="stSidebar"] { display: none !important; }
+    .main-content { padding: 0 8px !important; }
+}
+
+/* prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    .stApp::before, .stApp::after { animation: none !important; }
+}
+
 /* Hide Streamlit branding */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
@@ -277,7 +413,6 @@ footer {visibility: hidden;}
 
 
 def apply_theme():
-    """Inject the global CSS theme. Call once at the top of the app."""
     st.markdown(THEME_CSS, unsafe_allow_html=True)
 
 
@@ -285,14 +420,14 @@ def apply_theme():
 # BRAND & HEADER
 # ----------------------------------------------------------------------------
 def render_brand():
-    """Logo + wordmark, used in sidebar top."""
+    t = Translator()
     st.markdown(
-        """
-        <div class="slide-right" style="display:flex; align-items:center; gap:10px; padding:6px 8px; margin-bottom:8px;">
+        f"""
+        <div class="slide-left" style="display:flex; align-items:center; gap:10px; padding:6px 8px; margin-bottom:8px;">
             <div class="brand-logo">🚀</div>
             <div>
-                <div style="font-size:15px; font-weight:700; letter-spacing:0.3px;">YonocyTech AI</div>
-                <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">Low-Resource Intelligence</div>
+                <div style="font-size:15px; font-weight:700; letter-spacing:0.3px;">{t('app.name')}</div>
+                <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">{t('app.tagline')}</div>
             </div>
         </div>
         """,
@@ -300,85 +435,108 @@ def render_brand():
     )
 
 
-def render_header(active_page: str, agent_label: str = "General Assistant", online: bool = True):
-    """Top breadcrumb + status + primary CTA."""
-    status = '<span class="status-online">● Online</span>' if online else '<span class="status-error">● Offline</span>'
+def render_header(active_page: str = "Chat", agent_label: str = "General Assistant", online: bool = True):
+    t = Translator()
+    status = f'<span class="status-online">{t("online")}</span>' if online else f'<span class="status-error">{t("offline")}</span>'
+    lang = st.session_state.get("language", "fa")
+    dir_attr = 'rtl' if lang == 'fa' else 'ltr'
+
+    # Language switcher HTML
+    other_lang = "en" if lang == "fa" else "fa"
+    other_label = "🇬🇧 English" if lang == "fa" else "🇮🇷 فارسی"
+    lang_switcher = f"""
+        <div class="lang-switcher" onclick="document.getElementById('lang_switch_btn').click();"
+             style="cursor:pointer; display:flex; align-items:center; gap:6px;
+                    background:rgba(108,99,255,0.1); border:1px solid var(--border);
+                    padding:6px 12px; border-radius:999px; font-size:12px;">
+            {other_label} ▾
+        </div>
+    """
+
+    left_section = f"""
+        <span style="background:var(--surface); border:1px solid var(--border);
+                     padding:6px 12px; border-radius:999px; font-size:12px; color:var(--text-dim);">
+            <b style="color:var(--text);">{active_page}</b>
+        </span>
+        <span style="color:var(--text-mute);">›</span>
+        <span style="background:var(--surface); border:1px solid var(--border);
+                     padding:6px 12px; border-radius:999px; font-size:12px; color:var(--text-dim);">
+            {agent_label}
+        </span>
+        <span style="color:var(--text-mute);">·</span>
+        <span style="background:var(--surface); border:1px solid rgba(74,222,128,0.45);
+                     padding:6px 12px; border-radius:999px; font-size:12px;">{status}</span>
+    """
+
+    right_section = f"""
+        <div style="display:flex; align-items:center; gap:8px;">
+            {lang_switcher}
+        </div>
+    """
+
+    if dir_attr == "rtl":
+        layout = f"{right_section}<div style='display:flex; align-items:center; gap:10px;'>{left_section}</div>"
+    else:
+        layout = f"<div style='display:flex; align-items:center; gap:10px;'>{left_section}</div>{right_section}"
+
     st.markdown(
         f"""
         <div class="fade-in" style="display:flex; align-items:center; justify-content:space-between;
                     padding:14px 4px; border-bottom:1px solid var(--border); margin-bottom:18px;">
-            <div style="display:flex; align-items:center; gap:10px;">
-                <span style="background:var(--surface); border:1px solid var(--border);
-                             padding:6px 12px; border-radius:999px; font-size:12px; color:var(--text-dim);">
-                    <b style="color:var(--text);">{active_page}</b>
-                </span>
-                <span style="color:var(--text-mute);">›</span>
-                <span style="background:var(--surface); border:1px solid var(--border);
-                             padding:6px 12px; border-radius:999px; font-size:12px; color:var(--text-dim);">
-                    {agent_label}
-                </span>
-                <span style="color:var(--text-mute);">·</span>
-                <span style="background:var(--surface); border:1px solid rgba(74,222,128,0.45);
-                             padding:6px 12px; border-radius:999px; font-size:12px;">{status}</span>
-            </div>
+            {layout}
         </div>
         """,
         unsafe_allow_html=True,
     )
 
+    # Hidden button for language switch
+    if st.button(other_label, key="lang_switch_btn", help=t("language")):
+        st.session_state["language"] = other_lang
+        st.rerun()
+
 
 # ----------------------------------------------------------------------------
-# AGENT SIDEBAR LIST
+# AGENT META
 # ----------------------------------------------------------------------------
 AGENT_META = {
-    "coding":    {"icon": "💻", "desc": "Generate & execute"},
-    "writing":   {"icon": "✍️", "desc": "Pro & creative"},
-    "data":      {"icon": "📊", "desc": "CSV / Excel analysis"},
-    "design":    {"icon": "🎨", "desc": "UI / UX specs"},
-    "marketing": {"icon": "📈", "desc": "SEO & growth"},
-    "research":  {"icon": "🔍", "desc": "Deep web + citations"},
+    "coding":    {"icon": "💻", "desc_key": "agents.coding"},
+    "writing":   {"icon": "✍️", "desc_key": "agents.writing"},
+    "data":      {"icon": "📊", "desc_key": "agents.data"},
+    "design":    {"icon": "🎨", "desc_key": "agents.design"},
+    "marketing": {"icon": "📈", "desc_key": "agents.marketing"},
+    "research":  {"icon": "🔍", "desc_key": "agents.research"},
+    "summarizer":{"icon": "📝", "desc_key": "agents.summarizer"},
+    "tutor":     {"icon": "🎓", "desc_key": "agents.tutor"},
 }
 
 
-def render_agent_item(key: str, label: str, active: bool = False) -> bool:
-    """Render a single agent row. Returns True if clicked."""
-    meta = AGENT_META.get(key.lower(), {"icon": "🤖", "desc": ""})
-    active_cls = "active" if active else ""
-    st.markdown(
-        f"""
-        <div class="agent-row {active_cls}" style="display:flex; align-items:center; gap:10px;
-                    padding:10px 12px; border-radius:14px; cursor:pointer;
-                    border:1px solid {'var(--border-strong)' if active else 'transparent'};
-                    background: {'linear-gradient(90deg, rgba(108,99,255,0.20), rgba(0,217,255,0.10))' if active else 'transparent'};
-                    margin-bottom:4px; transition:all .2s;">
-            <div style="width:32px; height:32px; border-radius:9px; display:grid; place-items:center;
-                        background:rgba(108,99,255,0.15); font-size:16px;">{meta['icon']}</div>
-            <div>
-                <div style="font-size:13px; font-weight:600;">{label}</div>
-                <div style="font-size:11px; color:var(--text-dim);">{meta['desc']}</div>
-            </div>
-            <div style="margin-left:auto; width:7px; height:7px; border-radius:50%; background:var(--success);
-                        box-shadow:0 0 0 3px rgba(74,222,128,0.18);"></div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    return st.button(f"Use {label}", key=f"agent_{key}", use_container_width=True)
+def render_session_card(user_name: str = "Habibur Rahman", tier: str = "Free"):
+    t = Translator()
+    user = st.session_state.get("user", None)
+    if user:
+        name = user.get("name", user_name)
+        email = user.get("email", "")
+        picture = user.get("picture", "")
+        is_admin = user.get("is_admin", False)
+        tier_label = "Admin" if is_admin else t("free_tier")
 
+        if picture:
+            avatar_html = f'<img src="{picture}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;" />'
+        else:
+            initials = "".join([p[0] for p in name.split()[:2]]).upper() or "U"
+            avatar_html = f'<div style="width:36px; height:36px; border-radius:50%; background:var(--gradient-brand); display:grid; place-items:center; font-weight:700; color:#fff; font-size:13px;">{initials}</div>'
+    else:
+        avatar_html = f'<div style="width:36px; height:36px; border-radius:50%; background:var(--gradient-brand); display:grid; place-items:center; font-weight:700; color:#fff; font-size:13px;">?</div>'
+        name = t("auth.login_guest")
+        tier_label = ""
 
-def render_session_card(user_name: str = "Habibur Rahman", tier: str = "Free tier"):
-    """Bottom user pill inside the sidebar."""
-    initials = "".join([p[0] for p in user_name.split()[:2]]).upper() or "U"
     st.markdown(
         f"""
         <div class="glass-card fade-in" style="display:flex; align-items:center; gap:10px; margin-top:18px;">
-            <div style="width:36px; height:36px; border-radius:50%; background:var(--gradient-brand);
-                        display:grid; place-items:center; font-weight:700; color:#fff; font-size:13px;">
-                {initials}
-            </div>
+            {avatar_html}
             <div>
-                <div style="font-size:13px; font-weight:600;">{user_name}</div>
-                <div style="font-size:11px; color:var(--text-dim);">{tier} · $0.00</div>
+                <div style="font-size:13px; font-weight:600;">{name}</div>
+                <div style="font-size:11px; color:var(--text-dim);">{tier_label}</div>
             </div>
         </div>
         """,
@@ -390,18 +548,18 @@ def render_session_card(user_name: str = "Habibur Rahman", tier: str = "Free tie
 # ASIDE PANELS
 # ----------------------------------------------------------------------------
 def render_aside_provider(providers: list):
-    """Live provider / fallback status panel."""
+    t = Translator()
     rows = ""
     for p in providers[:5]:
-        rows += f'<div class="kv"><span>{p.get("role","Provider")}</span><b>{p.get("name","—")}</b></div>'
+        rows += f'<div class="kv"><span>{p.get("role", t("provider.primary"))}</span><b>{p.get("name", "—")}</b></div>'
     st.markdown(
         f"""
-        <div class="glass-card fade-in">
+        <div class="glass-card fade-in aside-panel">
             <h3 style="margin:0 0 10px; font-size:13px; display:flex; align-items:center; gap:8px;">
-                <span>📡</span> Active Provider
+                <span>📡</span> {t('provider.title')}
             </h3>
             {rows}
-            <div class="kv"><span>Status</span><b class="status-online">● Healthy</b></div>
+            <div class="kv"><span>{t('provider.status')}</span><b class="status-online">{t('provider.healthy')}</b></div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -409,14 +567,14 @@ def render_aside_provider(providers: list):
 
 
 def render_aside_chain(tasks: list):
-    """Multi-agent chain stepper."""
+    t = Translator()
     if not tasks:
-        body = '<div style="font-size:12px; color:var(--text-mute);">No active chain.</div>'
+        body = f'<div style="font-size:12px; color:var(--text-mute);">{t("chain.empty")}</div>'
     else:
         body = ""
-        for i, t in enumerate(tasks, 1):
-            label = t.get("agent", "agent")
-            desc = t.get("prompt", "")[:60]
+        for i, tk in enumerate(tasks, 1):
+            label = tk.get("agent", "agent")
+            desc = tk.get("prompt", "")[:60]
             body += f"""
                 <div style="display:flex; gap:10px; align-items:flex-start; padding:10px 0;
                             border-bottom:1px dashed var(--border);">
@@ -430,9 +588,9 @@ def render_aside_chain(tasks: list):
             """
     st.markdown(
         f"""
-        <div class="glass-card fade-in">
+        <div class="glass-card fade-in aside-panel">
             <h3 style="margin:0 0 10px; font-size:13px; display:flex; align-items:center; gap:8px;">
-                <span>⛓️</span> Current Chain
+                <span>⛓️</span> {t('chain.title')}
             </h3>
             {body}
         </div>
@@ -442,9 +600,9 @@ def render_aside_chain(tasks: list):
 
 
 def render_aside_memory(items: list):
-    """Vector + JSON recall panel."""
+    t = Translator()
     if not items:
-        body = '<div style="font-size:12px; color:var(--text-mute);">No memories yet.</div>'
+        body = f'<div style="font-size:12px; color:var(--text-mute);">{t("memory.empty")}</div>'
     else:
         body = ""
         for it in items[:5]:
@@ -458,9 +616,9 @@ def render_aside_memory(items: list):
             """
     st.markdown(
         f"""
-        <div class="glass-card fade-in">
+        <div class="glass-card fade-in aside-panel">
             <h3 style="margin:0 0 10px; font-size:13px; display:flex; align-items:center; gap:8px;">
-                <span>🧠</span> Memory Recall
+                <span>🧠</span> {t('memory.title')}
             </h3>
             {body}
         </div>
@@ -470,15 +628,15 @@ def render_aside_memory(items: list):
 
 
 def render_aside_stats(stats: dict):
-    """Tokens / cost / latency / blocked."""
+    t = Translator()
     rows = ""
     for k, v in stats.items():
         rows += f'<div class="kv"><span>{k}</span><b>{v}</b></div>'
     st.markdown(
         f"""
-        <div class="glass-card fade-in">
+        <div class="glass-card fade-in aside-panel">
             <h3 style="margin:0 0 10px; font-size:13px; display:flex; align-items:center; gap:8px;">
-                <span>📊</span> Session Stats
+                <span>📊</span> {t('stats.title')}
             </h3>
             {rows}
         </div>
@@ -491,17 +649,17 @@ def render_aside_stats(stats: dict):
 # CHAT UI
 # ----------------------------------------------------------------------------
 def render_welcome():
-    """Hero + 4 quick-start cards."""
+    t = Translator()
     st.markdown(
-        """
+        f"""
         <div class="fade-in" style="text-align:center; padding:36px 8px 8px;">
             <h1 style="font-size:32px; margin:0; font-weight:800;
                        background:var(--gradient-brand); -webkit-background-clip:text; background-clip:text; color:transparent;
                        letter-spacing:-0.5px;">
-                How can I help you ship today?
+                {t('chat.welcome_title')}
             </h1>
             <p style="color:var(--text-dim); margin:8px 0 0; font-size:14px;">
-                Ask anything · chain specialized agents · or pick a quick starter below.
+                {t('chat.welcome_desc')}
             </p>
         </div>
         """,
@@ -510,7 +668,6 @@ def render_welcome():
 
 
 def render_quick_starts(options: list):
-    """Render a row of quick-start buttons. options = [{icon,title,desc}]"""
     cols = st.columns(len(options))
     for col, opt in zip(cols, options):
         with col:
@@ -523,7 +680,6 @@ def render_quick_starts(options: list):
 
 
 def render_msg_bubble(role: str, name: str, content: str, agent_tag: str = None, meta: list = None):
-    """Render a single chat bubble (user or assistant)."""
     bubble_cls = "user-bubble" if role == "user" else "ai-bubble"
     who_html = ""
     if role != "user":
@@ -558,7 +714,6 @@ def render_msg_bubble(role: str, name: str, content: str, agent_tag: str = None,
 
 
 def render_typing(agent_tag: str = "AI"):
-    """Animated 3-dot typing indicator."""
     st.markdown(
         f"""
         <div class="fade-in" style="display:flex; gap:12px; margin:14px 0; align-items:flex-start;">
@@ -577,18 +732,67 @@ def render_typing(agent_tag: str = "AI"):
 
 
 # ----------------------------------------------------------------------------
-# METADATA (legacy compat)
+# AUTH UI
 # ----------------------------------------------------------------------------
-def render_agent_badge(agent_name: str):
-    """Renders a small badge indicating the active agent."""
+def render_login_page():
+    t = Translator()
     st.markdown(
-        f'<span class="agent-tag">{agent_name}</span>',
+        f"""
+        <div style="display:flex; justify-content:center; align-items:center; min-height:80vh;">
+            <div class="glass-card" style="max-width:420px; width:100%; padding:40px; text-align:center;">
+                <div class="brand-logo" style="margin:0 auto 20px;">🚀</div>
+                <h2 style="margin:0 0 8px; font-size:24px;">{t('auth.login_title')}</h2>
+                <p style="color:var(--text-dim); font-size:14px; margin:0 0 28px;">{t('auth.login_desc')}</p>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+        """,
         unsafe_allow_html=True,
     )
 
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🚪 " + t('auth.login_guest'), use_container_width=True):
+            st.session_state["user"] = {"name": "Guest", "role": "guest"}
+            st.rerun()
+    with col2:
+        if st.button("🔵 " + t('auth.login_google'), use_container_width=True):
+            from auth.google_auth import GoogleAuth
+            ga = GoogleAuth()
+            if ga.is_configured:
+                login_url = ga.get_login_url()
+                st.markdown(f'<meta http-equiv="refresh" content="0; url={login_url}">', unsafe_allow_html=True)
+            else:
+                st.session_state["user"] = {
+                    "name": "Demo User",
+                    "email": "demo@yonocytech.ir",
+                    "is_admin": True,
+                }
+                st.rerun()
+
+    st.markdown("</div></div></div>", unsafe_allow_html=True)
+
+
+def render_skeleton_loader(count: int = 3):
+    for _ in range(count):
+        st.markdown(
+            """
+            <div class="glass-card skeleton-card">
+                <div class="skeleton skeleton-line"></div>
+                <div class="skeleton skeleton-line"></div>
+                <div class="skeleton skeleton-line"></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+
+# ----------------------------------------------------------------------------
+# LEGACY
+# ----------------------------------------------------------------------------
+def render_agent_badge(agent_name: str):
+    st.markdown(f'<span class="agent-tag">{agent_name}</span>', unsafe_allow_html=True)
+
 
 def render_response_metadata(response: AgentResponse):
-    """Displays the latency and model used for a response in an expander."""
     with st.expander("View Response Metadata"):
         col1, col2, col3 = st.columns(3)
         col1.text(f"Provider: {response.provider}")
@@ -596,13 +800,3 @@ def render_response_metadata(response: AgentResponse):
         col3.text(f"Latency: {int(response.latency_ms)}ms")
         if getattr(response, "tokens_used", None):
             st.text(f"Tokens Used: {response.tokens_used}")
-
-
-def render_empty_state():
-    """Displays a welcome message when no chat is active."""
-    st.info("👋 Welcome to YonocyTech AI! Start a conversation in the chat tab or chain agents in the Agent Chain tab.")
-
-
-def render_welcome_message():
-    """Renders the main welcome header (legacy alias)."""
-    render_welcome()

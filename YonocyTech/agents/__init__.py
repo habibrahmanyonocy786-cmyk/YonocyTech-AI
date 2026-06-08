@@ -4,8 +4,9 @@ from agents.data_agent import DataAgent
 from agents.design_agent import DesignAgent
 from agents.marketing_agent import MarketingAgent
 from agents.research_agent import ResearchAgent
+from agents.summarizer_agent import SummarizerAgent
+from agents.tutor_agent import TutorAgent
 
-# Dictionary mapping focus area to agent class
 ALL_AGENTS = {
     "coding": CodingAgent,
     "writing": WritingAgent,
@@ -13,4 +14,6 @@ ALL_AGENTS = {
     "design": DesignAgent,
     "marketing": MarketingAgent,
     "research": ResearchAgent,
+    "summarizer": SummarizerAgent,
+    "tutor": TutorAgent,
 }
